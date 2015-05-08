@@ -10,11 +10,12 @@
 
 export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 clear
-echo "#######################################################################"
-echo "#         LNMP for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+          #"
-echo "#                    Upgrade PHP for LNMP                             #"
-echo "# For more information Please visit http://blog.linuxeye.com/31.html  #"
-echo "#######################################################################"
+printf "
+#######################################################################
+#      LEMP stack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+       #
+#                        Upgrade PHP for LEMP                         #
+#      For more information please visit https://lempstack.com        #
+#######################################################################"
 
 cd src
 . ../options.conf

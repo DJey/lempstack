@@ -14,8 +14,9 @@ export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 clear
 printf "
 #######################################################################
-#    LNMP/LAMP/LANMP for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+    #
-# For more information please visit http://blog.linuxeye.com/31.html  #
+#      LEMP stack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+       #
+#            Installs a PPTP VPN-only system for CentOS               #
+#      For more information please visit https://lempstack.com        #
 #######################################################################
 "
 

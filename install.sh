@@ -17,7 +17,8 @@ printf "
 #######################################################################
 #      LEMP stack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+       #
 #      For more information please visit https://lempstack.com        #
-#######################################################################"
+#######################################################################
+"
 
 get_char()
 {
@@ -82,7 +83,7 @@ do
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
                 if [ "$Web_yn" == 'y' ];then
-                        [ -d "$web_install_dir" ] && { echo -e "\033[31mThe web service already installed! \033[0m" ; Web_yn=n ; break ; }
+                        [ -d "$web_install_dir" ] && { echo -e "\033[31mThe web service already installed! \033[0m" ; Web_yn=Other ; break ; }
                         while :
                         do
                                 echo
@@ -111,7 +112,7 @@ do
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
                 if [ "$DB_yn" == 'y' ];then
-                        [ -d "$db_install_dir" ] && { echo -e "\033[31mThe database already installed! \033[0m" ; DB_yn=n ; break ; }
+                        [ -d "$db_install_dir" ] && { echo -e "\033[31mThe database already installed! \033[0m" ; DB_yn=Other ; break ; }
                         while :
                         do
                                 echo
@@ -150,7 +151,7 @@ if [ "$PHP_yn" != 'y' -a "$PHP_yn" != 'n' ];then
         echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
 else
         if [ "$PHP_yn" == 'y' ];then
-                [ -d "$php_install_dir" ] && { echo -e "\033[31mThe php already installed! \033[0m" ; PHP_yn=n ; break ; }
+                [ -d "$php_install_dir" ] && { echo -e "\033[31mThe php already installed! \033[0m" ; PHP_yn=Other ; break ; }
                 while :
                 do
                         echo
@@ -325,7 +326,6 @@ else
 fi
 done
 
-if [ "$Web_yn" == 'y' -a "$DB_yn" == 'y' -a "$PHP_yn" == 'y' ];then
 # check Pureftpd
 while :
 do
@@ -335,12 +335,12 @@ do
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
 
-                if [ "$FTP_yn" == 'y' ];then
-                        [ -d "$pureftpd_install_dir" ] && { echo -e "\033[31mThe FTP service already installed! \033[0m" ; FTP_yn=n ; break ; }
+                if [ "$FTP_yn" == 'y' -a "$Web_yn" != 'n' -a "$DB_yn" != 'n' -a "$PHP_yn" != 'n' ];then
+                        [ -d "$pureftpd_install_dir" ] && { echo -e "\033[31mThe FTP service already installed! \033[0m" ; FTP_yn=Other ; break ; }
                         while :
                         do
                                 read -p "Please input the manager password of Pure-FTPd: " ftpmanagerpwd
-				[ -n "`echo $ftpmanagerpwd | grep '[+|&]'`" ] && { echo -e "\033[31minput error,not contain a plus sign (+) and &\033[0m"; continue; }
+                                [ -n "`echo $ftpmanagerpwd | grep '[+|&]'`" ] && { echo -e "\033[31minput error,not contain a plus sign (+) and &\033[0m"; continue; }
                                 if (( ${#ftpmanagerpwd} >= 5 ));then
                                         sed -i "s+^ftpmanagerpwd.*+ftpmanagerpwd='$ftpmanagerpwd'+" options.conf
                                         break
@@ -348,11 +348,14 @@ do
                                         echo -e "\033[31mFtp manager password least 5 characters! \033[0m"
                                 fi
                         done
+                else
+                        echo -e "\033[31mYou did not choose to install the Web server,Database and PHP\033[0m"
                 fi
                 break
         fi
 done
-fi
+
+[ "$FTP_yn" == 'Other' ] && $db_install_dir/bin/mysql -uroot -p$dbrootpwd < conf/script.mysql
 
 # check phpMyAdmin
 while :
@@ -435,14 +438,11 @@ chmod +x functions/*.sh init/* *.sh
 # init
 if [ "$OS" == 'CentOS' ];then
 	. init/init_CentOS.sh 2>&1 | tee $lemp_dir/install.log
-	#/bin/mv init/init_CentOS.sh init/init_CentOS.ed
 	[ -n "`gcc --version | head -n1 | grep '4\.1\.'`" ] && export CC="gcc44" CXX="g++44"
 elif [ "$OS" == 'Debian' ];then
 	. init/init_Debian.sh 2>&1 | tee $lemp_dir/install.log
-	#/bin/mv init/init_Debian.sh init/init_Debian.ed
 elif [ "$OS" == 'Ubuntu' ];then
 	. init/init_Ubuntu.sh 2>&1 | tee $lemp_dir/install.log
-	#/bin/mv init/init_Ubuntu.sh init/init_Ubuntu.ed
 fi
 
 # jemalloc or tcmalloc
@@ -526,7 +526,7 @@ elif [ "$PHP_cache" == '4' -a "$PHP_version" == '1' ];then
         Install_eAccelerator-0-9 2>&1 | tee -a $lemp_dir/install.log
 fi
 
-# ZendGuardLoader (php <= 5.4)
+# ZendGuardLoader (php <= 5.6)
 if [ "$ZendGuardLoader_yn" == 'y' ];then
 	. functions/ZendGuardLoader.sh
         Install_ZendGuardLoader 2>&1 | tee -a $lemp_dir/install.log

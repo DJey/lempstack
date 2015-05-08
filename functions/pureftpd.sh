@@ -44,7 +44,7 @@ update-rc.d pureftpd defaults"
 	sed -i "s@^MySQLConfigFile.*@MySQLConfigFile   $pureftpd_install_dir/pureftpd-mysql.conf@" $pureftpd_install_dir/pure-ftpd.conf
 	sed -i "s@^LimitRecursion.*@LimitRecursion	65535 8@" $pureftpd_install_dir/pure-ftpd.conf
 	/bin/cp conf/pureftpd-mysql.conf $pureftpd_install_dir/
-	conn_ftpusers_dbpwd=`cat /dev/urandom | head -1 | md5sum | head -c 8`
+	[ -z "$conn_ftpusers_dbpwd" ] && conn_ftpusers_dbpwd=`cat /dev/urandom | head -1 | md5sum | head -c 8`
 	sed -i "s@^conn_ftpusers_dbpwd.*@conn_ftpusers_dbpwd=$conn_ftpusers_dbpwd@" options.conf
 	sed -i 's/tmppasswd/'$conn_ftpusers_dbpwd'/g' $pureftpd_install_dir/pureftpd-mysql.conf
 	sed -i 's/conn_ftpusers_dbpwd/'$conn_ftpusers_dbpwd'/g' conf/script.mysql
@@ -66,12 +66,21 @@ update-rc.d pureftpd defaults"
 	mv ftp $home_dir/default
 	cd ..
 
-	# iptables Ftp
-	iptables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 21 -j ACCEPT
-	iptables -I INPUT 6 -p tcp -m state --state NEW -m tcp --dport 20000:30000 -j ACCEPT
-	OS_CentOS='service iptables save'
-	OS_Debian_Ubuntu='iptables-save > /etc/iptables.up.rules'
-	OS_command
+        # iptables Ftp
+        if [ -e '/etc/sysconfig/iptables' ];then
+                if [ -z "`grep '20000:30000' /etc/sysconfig/iptables`" ];then
+                        iptables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 21 -j ACCEPT
+                        iptables -I INPUT 6 -p tcp -m state --state NEW -m tcp --dport 20000:30000 -j ACCEPT
+                fi
+        elif [ -e '/etc/iptables.up.rules' ];then
+                if [ -z "`grep '20000:30000' /etc/iptables.up.rules`" ];then
+                        iptables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 21 -j ACCEPT
+                        iptables -I INPUT 6 -p tcp -m state --state NEW -m tcp --dport 20000:30000 -j ACCEPT
+                fi
+        fi
+        OS_CentOS='service iptables save'
+        OS_Debian_Ubuntu='iptables-save > /etc/iptables.up.rules'
+        OS_command
 else
 	cd ../../
         echo -e "\033[31mPure-Ftp install failed, Please contact the author! \033[0m"
