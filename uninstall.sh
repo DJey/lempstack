@@ -29,6 +29,8 @@ Uninstall()
 [ -e "$memcached_install_dir" ] && service memcached stop && rm -rf /etc/init.d/memcached
 [ -e "/usr/local/imagemagick" ] && rm -rf /usr/local/imagemagick 
 [ -e "/usr/local/graphicsmagick" ] && rm -rf /usr/local/graphicsmagick 
+id -u $run_user >/dev/null 2>&1 ; [ $? -eq 0 ] && userdel $run_user
+id -u mysql >/dev/null 2>&1 ; [ $? -eq 0 ] && userdel mysql
 
 /bin/mv ${home_dir}{,_$(date +%F)}
 /bin/mv ${db_data_dir}{,_$(date +%F)}

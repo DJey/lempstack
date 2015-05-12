@@ -77,7 +77,7 @@ echo
 echo "Create Virtul Host directory......"
 mkdir -p $vhostdir
 echo "set permissions of Virtual Host directory......"
-chown -R www.www $vhostdir
+chown -R ${run_user}.$run_user $vhostdir
 }
 
 Nginx_anti_hotlinking()
