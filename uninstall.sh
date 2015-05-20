@@ -12,16 +12,17 @@ export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 clear
 printf "
 #######################################################################
-#    LNMP/LAMP/LANMP for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+    #
+#      LEMP stack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+       #
 #                           Uninstall LEMP                            #
-# For more information please visit http://blog.linuxeye.com/31.html  #
+#      For more information please visit https://lempstack.com        #
 #######################################################################
 "
+
 . ./options.conf
 
 Uninstall()
 {
-[ -e "$db_install_dir" ] && service mysqld stop && rm -rf /etc/init.d/mysqld /etc/my.cnf /etc/ld.so.conf.d/mysql.conf /usr/include/mysql
+[ -e "$db_install_dir" ] && service mysqld stop && rm -rf /etc/init.d/mysqld /etc/my.cnf
 [ -e "$php_install_dir" ] && service php-fpm stop && rm -rf /etc/init.d/php-fpm
 [ -e "$web_install_dir" ] && service nginx stop && rm -rf /etc/init.d/nginx /etc/logrotate.d/nginx
 [ -e "$pureftpd_install_dir" ] && service pureftpd stop && rm -rf /etc/init.d/pureftpd
@@ -62,16 +63,15 @@ stty $SAVEDSTTY
 } 
  
 echo 
-echo -e "\033[31mYou will uninstall LNMP, Please backup your configure files and DB data! \033[0m"
+echo -e "\033[31mYou will uninstall LEMP, Please backup your configure files and DB data! \033[0m"
 echo 
 echo -e "\033[33mThe following directory or files will be remove: \033[0m"
 for D in `cat ./options.conf | grep dir= | grep -v lemp_dir | awk -F'=' '{print $2}' | sort | uniq` 
 do
 	[ -e "$D" ] && echo $D
 done
-[ -e "$web_install_dir" ] && echo -e "/etc/init.d/nginx\n/etc/logrotate.d/nginx" && [ -e "/var/ngx_pagespeed_cache" ] && echo '/var/ngx_pagespeed_cache'
-[ -e "$apache_install_dir" ] && echo '/etc/init.d/httpd'
-[ -e "$db_install_dir" ] && echo -e "/etc/init.d/mysqld\n/etc/my.cnf\n/etc/ld.so.conf.d/mysql.conf\n/usr/include/mysql"
+[ -e "$web_install_dir" ] && echo -e "/etc/init.d/nginx\n/etc/logrotate.d/nginx"
+[ -e "$db_install_dir" ] && echo -e "/etc/init.d/mysqld\n/etc/my.cnf"
 [ -e "$php_install_dir" ] && echo '/etc/init.d/php-fpm'
 [ -e "$pureftpd_install_dir" ] && echo '/etc/init.d/pureftpd'
 [ -e "$memcached_install_dir" ] && echo '/etc/init.d/memcached' 
@@ -85,7 +85,7 @@ char=`get_char`
 while :
 do
         echo
-        read -p "Do you want to uninstall LNMP? [y/n]: " uninstall_yn
+        read -p "Do you want to uninstall LEMP? [y/n]: " uninstall_yn
         if [ "$uninstall_yn" != 'y' -a "$uninstall_yn" != 'n' ];then
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else

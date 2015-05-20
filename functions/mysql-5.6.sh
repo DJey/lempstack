@@ -18,21 +18,23 @@ elif [ `getconf WORD_BIT` == 32 ] && [ `getconf LONG_BIT` == 32 ];then
 	SYS_BIT=i686
 fi
 
-src_url=http://cdn.mysql.com/Downloads/MySQL-5.6/mysql-5.6.24-linux-glibc2.5-$SYS_BIT.tar.gz && Download_src
+src_url=http://cdn.mysql.com/Downloads/MySQL-5.6/mysql-${mysql_6_version}-linux-glibc2.5-$SYS_BIT.tar.gz && Download_src
 
 useradd -M -s /sbin/nologin mysql
 mkdir -p $mysql_data_dir;chown mysql.mysql -R $mysql_data_dir
-tar zxf mysql-5.6.24-linux-glibc2.5-$SYS_BIT.tar.gz 
-mv mysql-5.6.24-linux-glibc2.5-$SYS_BIT $mysql_install_dir
+tar zxf mysql-${mysql_6_version}-linux-glibc2.5-$SYS_BIT.tar.gz 
+[ ! -d "$mysql_install_dir" ] && mkdir -p $mysql_install_dir
+mv mysql-${mysql_6_version}-linux-glibc2.5-$SYS_BIT/* $mysql_install_dir
 if [ "$je_tc_malloc" == '1' ];then
 	sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' $mysql_install_dir/bin/mysqld_safe
 elif [ "$je_tc_malloc" == '2' ];then
 	sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libtcmalloc.so@' $mysql_install_dir/bin/mysqld_safe
 fi
 
-if [ -d "$mysql_install_dir" ];then
+if [ -d "$mysql_install_dir/bin" ];then
         echo -e "\033[32mMySQL install successfully! \033[0m"
 else
+        rm -rf $mysql_install_dir
         echo -e "\033[31mMySQL install failed, Please contact the author! \033[0m"
         kill -9 $$
 fi

@@ -20,9 +20,9 @@ if [ "$Kernel_ver" == '2.6' ];then
 	elif [ `getconf WORD_BIT` == 32 ] && [ `getconf LONG_BIT` == 32 ];then
 		SYS_BIT=i686
 	fi
-	src_url=http://cdn.mysql.com/Downloads/MySQL-5.5/mysql-5.5.43-linux2.6-$SYS_BIT.tar.gz && Download_src
-	tar zxf mysql-5.5.43-linux2.6-$SYS_BIT.tar.gz 
-	mv mysql-5.5.43-linux2.6-$SYS_BIT $mysql_install_dir
+	src_url=http://cdn.mysql.com/Downloads/MySQL-5.5/mysql-${mysql_5_version}-linux2.6-$SYS_BIT.tar.gz && Download_src
+	tar zxf mysql-${mysql_5_version}-linux2.6-$SYS_BIT.tar.gz 
+	mv mysql-${mysql_5_version}-linux2.6-$SYS_BIT $mysql_install_dir
 
 	if [ "$je_tc_malloc" == '1' ];then
 		sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' $mysql_install_dir/bin/mysqld_safe
@@ -30,15 +30,16 @@ if [ "$Kernel_ver" == '2.6' ];then
 		sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libtcmalloc.so@' $mysql_install_dir/bin/mysqld_safe
 	fi
 else
-	src_url=http://cdn.mysql.com/Downloads/MySQL-5.5/mysql-5.5.43.tar.gz && Download_src
-	tar zxf mysql-5.5.43.tar.gz
-	cd mysql-5.5.43
+	src_url=http://cdn.mysql.com/Downloads/MySQL-5.5/mysql-${mysql_5_version}.tar.gz && Download_src
+	tar zxf mysql-${mysql_5_version}.tar.gz
+	cd mysql-${mysql_5_version}
 	if [ "$je_tc_malloc" == '1' ];then
 	        EXE_LINKER="-DCMAKE_EXE_LINKER_FLAGS='-ljemalloc'"
 	elif [ "$je_tc_malloc" == '2' ];then
 	        EXE_LINKER="-DCMAKE_EXE_LINKER_FLAGS='-ltcmalloc'"
 	fi
 	make clean
+	[ ! -d "$mysql_install_dir" ] && mkdir -p $mysql_install_dir
 	cmake . -DCMAKE_INSTALL_PREFIX=$mysql_install_dir \
 	-DMYSQL_DATADIR=$mysql_data_dir \
 	-DSYSCONFDIR=/etc \
@@ -62,9 +63,10 @@ fi
 useradd -M -s /sbin/nologin mysql
 mkdir -p $mysql_data_dir;chown mysql.mysql -R $mysql_data_dir
 
-if [ -d "$mysql_install_dir" ];then
+if [ -d "$mysql_install_dir/bin" ];then
         echo -e "\033[32mMySQL install successfully! \033[0m"
 else
+        rm -rf $mysql_install_dir
         echo -e "\033[31mMySQL install failed, Please contact the author! \033[0m"
         kill -9 $$
 fi

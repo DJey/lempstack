@@ -12,19 +12,19 @@ cd $lemp_dir/src
 . ../functions/check_os.sh 
 . ../options.conf
 
-src_url=http://downloads.sourceforge.net/project/pcre/pcre/8.37/pcre-8.37.tar.gz && Download_src
-src_url=http://nginx.org/download/nginx-1.8.0.tar.gz && Download_src
+src_url=http://downloads.sourceforge.net/project/pcre/pcre/$pcre_version/pcre-$pcre_version.tar.gz && Download_src
+src_url=http://nginx.org/download/nginx-$nginx_version.tar.gz && Download_src
 
-tar xzf pcre-8.37.tar.gz
-cd pcre-8.37
+tar xzf pcre-$pcre_version.tar.gz
+cd pcre-$pcre_version
 ./configure
 make && make install
 cd ../
 
-tar xzf nginx-1.8.0.tar.gz
+tar xzf nginx-$nginx_version.tar.gz
 id -u $run_user >/dev/null 2>&1
-[ $? -ne 0 ] && useradd -M -s /sbin/nologin $run_user
-cd nginx-1.8.0
+[ $? -ne 0 ] && useradd -M -s /sbin/nologin $run_user 
+cd nginx-$nginx_version
 
 # Modify Nginx version
 #sed -i 's@#define NGINX_VERSION.*$@#define NGINX_VERSION      "1.2"@' src/core/nginx.h
@@ -42,11 +42,13 @@ elif [ "$je_tc_malloc" == '2' ];then
 	chown -R ${run_user}.$run_user /tmp/tcmalloc
 fi
 
+[ ! -d "$nginx_install_dir" ] && mkdir -p $nginx_install_dir
 ./configure --prefix=$nginx_install_dir --user=$run_user --group=$run_user --with-http_stub_status_module --with-http_spdy_module --with-http_ssl_module --with-ipv6 --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module $malloc_module
 make && make install
-if [ -d "$nginx_install_dir" ];then
+if [ -d "$nginx_install_dir/conf" ];then
         echo -e "\033[32mNginx install successfully! \033[0m"
 else
+	rm -rf $nginx_install_dir
         echo -e "\033[31mNginx install failed, Please Contact the author! \033[0m"
         kill -9 $$
 fi
@@ -64,11 +66,7 @@ OS_command
 sed -i "s@/usr/local/nginx@$nginx_install_dir@g" /etc/init.d/nginx
 
 mv $nginx_install_dir/conf/nginx.conf{,_bk}
-if [ "$Apache_version" == '1' -o "$Apache_version" == '2' ];then
-	/bin/cp conf/nginx_apache.conf $nginx_install_dir/conf/nginx.conf
-else
-	/bin/cp conf/nginx.conf $nginx_install_dir/conf/nginx.conf
-fi
+/bin/cp conf/nginx.conf $nginx_install_dir/conf/nginx.conf
 sed -i "s@/home/wwwroot/default@$home_dir/default@" $nginx_install_dir/conf/nginx.conf
 sed -i "s@/home/wwwlogs@$wwwlogs_dir@g" $nginx_install_dir/conf/nginx.conf
 sed -i "s@^user www www@user $run_user $run_user@" $nginx_install_dir/conf/nginx.conf

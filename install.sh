@@ -37,6 +37,9 @@ sed -i "s@^lemp_dir.*@lemp_dir=`pwd`@" ./options.conf
 # get local ip address
 local_IP=`./functions/get_local_ip.py`
 
+# import apps version
+. ./apps.conf
+
 # Definition Directory
 . ./options.conf
 . functions/check_os.sh
@@ -83,7 +86,7 @@ do
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
                 if [ "$Web_yn" == 'y' ];then
-                        [ -d "$web_install_dir" ] && { echo -e "\033[31mThe web service already installed! \033[0m" ; Web_yn=Other ; break ; }
+                        [ -d "$web_install_dir/conf" ] && { echo -e "\033[31mThe web service already installed! \033[0m" ; Web_yn=Other ; break ; }
                         while :
                         do
                                 echo
@@ -112,7 +115,7 @@ do
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
                 if [ "$DB_yn" == 'y' ];then
-                        [ -d "$db_install_dir" ] && { echo -e "\033[31mThe database already installed! \033[0m" ; DB_yn=Other ; break ; }
+                        [ -d "$db_install_dir/support-files" ] && { echo -e "\033[31mThe database already installed! \033[0m" ; DB_yn=Other ; break ; }
                         while :
                         do
                                 echo
@@ -151,7 +154,7 @@ if [ "$PHP_yn" != 'y' -a "$PHP_yn" != 'n' ];then
         echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
 else
         if [ "$PHP_yn" == 'y' ];then
-                [ -d "$php_install_dir" ] && { echo -e "\033[31mThe php already installed! \033[0m" ; PHP_yn=Other ; break ; }
+                [ -d "$php_install_dir/bin" ] && { echo -e "\033[31mThe php already installed! \033[0m" ; PHP_yn=Other ; break ; }
                 while :
                 do
                         echo
@@ -334,7 +337,7 @@ do
         if [ "$FTP_yn" != 'y' -a "$FTP_yn" != 'n' ];then
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
-                [ "$FTP_yn" == 'y' -a -d "$pureftpd_install_dir" ] && { echo -e "\033[31mThe FTP service already installed! \033[0m" ; FTP_yn=Other ; break ; }
+                [ "$FTP_yn" == 'y' -a -d "$pureftpd_install_dir/bin" ] && { echo -e "\033[31mThe FTP service already installed! \033[0m" ; FTP_yn=Other ; break ; }
                 break
         fi
 done
@@ -379,7 +382,7 @@ do
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
 		if [ "$memcached_yn" == 'y' ];then
-			[ -d "$memcached_install_dir" ] && { echo -e "\033[31mThe memcached already installed! \033[0m" ; memcached_yn=Other ; break ; }
+			[ -d "$memcached_install_dir/bin" ] && { echo -e "\033[31mThe memcached already installed! \033[0m" ; memcached_yn=Other ; break ; }
 		fi
                 break
         fi
