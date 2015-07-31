@@ -1,19 +1,21 @@
-   This script is free collection of shell scripts for rapid deployment of `LEMP` stacks (Linux, Nginx, MySQL, PHP) for CentOS/Redhat Debian and Ubuntu.
+This script is free collection of shell scripts for rapid deployment of `LEMP` stacks (Linux, Nginx, MySQL, PHP) for CentOS/Redhat Debian and Ubuntu.
 
-   Script features: 
-- Constant updates 
-- Source compiler installation, most source code is the latest stable version, and downloaded from the official website
-- Fixes some security issues 
-- You can freely choose to install database version (MySQL-5.6, MySQL-5.5, MariaDB-10.0, MariaDB-5.5, Percona-5.6, Percona-5.5)
-- You can freely choose to install PHP version (php-5.3, php-5.4, php-5.5, php-5.6, php-7/phpng(alpha))
-- You can freely choose to install Nginx or Tengine
-- According to their needs can to install ZendOPcache, xcache, APCU, eAccelerator, ionCube and ZendGuardLoader (php-5.4, php-5.3)
-- According to their needs can to install Pureftpd, phpMyAdmin
-- According to their needs can to install memcached, redis
-- According to their needs can to optimize MySQL and Nginx with jemalloc or tcmalloc
-- Add a virtual host script provided
-- Nginx/Tengine, PHP, Redis, phpMyAdmin upgrade script provided
-- Add backup script provided
+Script features: 
+Script properties:
+- Continually updated
+- Source compiler installation, most stable source is the latest version, and download from the official site
+- Some security optimization
+- Providing a plurality of database versions (MySQL-5.6, MySQL-5.5, MariaDB-10.0, MariaDB-5.5, Percona-5.6, Percona-5.5)
+- Providing multiple PHP versions (php-5.3, php-5.4, php-5.5, php-5.6, php-7/phpng(Beta))
+- Provide Nginx, Tengine
+- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php encryption and decryption tool ionCube, ZendGuardLoader
+- Installation Pureftpd, phpMyAdmin according to their needs
+- Install memcached, redis according to their needs
+- Tcmalloc can use according to their needs or jemalloc optimize MySQL, Nginx
+- Providing add a virtual host script
+- Provide Nginx/Tengine, MySQL/MariaDB/Percona, PHP, Redis, phpMyAdmin upgrade script
+- Provide local backup and remote backup (rsync between servers) script
+- Provided under HHVM install CentOS 6,7
 
 ## How to use 
 
@@ -77,10 +79,7 @@ Memcached:
 
 ## How to upgrade 
 ```bash
-   ./upgrade_php.sh # upgrade PHP
-   ./upgrade_web.sh # upgrade Nginx/Tengine
-   ./upgrade_redis.sh # upgrade Redis 
-   ./upgrade_phpmyadmin.sh # upgrade phpMyAdmin 
+   ./upgrade.sh
 ```
 
 ## How to uninstall 
