@@ -1,95 +1,140 @@
-This script is free collection of shell scripts for rapid deployment of `LEMP` stacks (Linux, Nginx, MySQL, PHP) for CentOS/Redhat Debian and Ubuntu.
+[![PayPal donate button](https://img.shields.io/badge/paypal-donate-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=lj2007331@gmail.com&item_name=OneinStack%20Donate&currency_code=USD)
+[![支付宝捐助按钮](https://img.shields.io/badge/%E6%94%AF%E4%BB%98%E5%AE%9D-%E5%90%91TA%E6%8D%90%E5%8A%A9-green.svg)](https://static.oneinstack.com/images/alipay.png)
+[![微信捐助按钮](https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1-%E5%90%91TA%E6%8D%90%E5%8A%A9-green.svg)](https://static.oneinstack.com/images/weixin.png)
 
-Script features: 
+This script is written using the shell, in order to quickly deploy `LEMP`/`LAMP`/`LNMP`/`LNMPA`/`LTMP`(Linux, Nginx/Tengine/OpenResty, MySQL in a production environment/MariaDB/Percona, PHP, JAVA), applicable to CentOS 5~7(including redhat), Debian 6~8, Ubuntu 12~16 of 32 and 64.
+
 Script properties:
 - Continually updated
 - Source compiler installation, most stable source is the latest version, and download from the official site
 - Some security optimization
-- Providing a plurality of database versions (MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-10.1, MariaDB-10.0, MariaDB-5.5, Percona-5.6, Percona-5.5)
-- Providing multiple PHP versions (php-5.3, php-5.4, php-5.5, php-5.6, php-7)
-- Provide Nginx, Tengine
+- Providing a plurality of database versions (MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-10.1, MariaDB-10.0, MariaDB-5.5, Percona-5.7, Percona-5.6, Percona-5.5)
+- Providing multiple PHP versions (php-7, php-5.6, php-5.5, php-5.4, php-5.3)
+- Provide Nginx, Tengine, OpenResty
+- Providing a plurality of Tomcat version (Tomcat-8, Tomcat-7, Tomcat-6)
+- Providing a plurality of JDK version (JDK-1.8, JDK-1.7, JDK-1.6)
+- Providing a plurality of Apache version (Apache-2.4, Apache-2.2)
 - According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php encryption and decryption tool ionCube, ZendGuardLoader
 - Installation Pureftpd, phpMyAdmin according to their needs
 - Install memcached, redis according to their needs
 - Tcmalloc can use according to their needs or jemalloc optimize MySQL, Nginx
-- Providing add a virtual host script
+- Providing add a virtual host script, include Let's Encrypt SSL certificate
 - Provide Nginx/Tengine, MySQL/MariaDB/Percona, PHP, Redis, phpMyAdmin upgrade script
 - Provide local backup and remote backup (rsync between servers) script
 - Provided under HHVM install CentOS 6,7
 
 ## How to use 
 
+If your server system: CentOS/Redhat (Do not enter "//" and "// subsequent sentence)
 ```bash
-   yum -y install wget git screen # for CentOS/Redhat
-   #apt-get -y install wget git screen # for Debian/Ubuntu 
-   git clone https://github.com/lj2007331/lempstack.git
-   cd lempstack && chmod +x install.sh
-   # Prevent interrupt the installation process. If the network is down, 
-   # you can execute commands `screen -r lempstack` network reconnect the installation window.
-   screen -S lempstack 
-   ./install.sh
+yum -y install wget screen python   // for CentOS / Redhat
+wget http://mirrors.linuxeye.com/oneinstack-full.tar.gz   // Contains the source code
+tar xzf oneinstack-full.tar.gz
+cd oneinstack   // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
+screen -S oneinstack    // If network interruption, you can execute the command `screen -r oneinstack` reconnect install window
+./install.sh   // Do not sh install.sh or bash install.sh such execution
+```
+If your server system: Debian/Ubuntu (Do not enter "//" and "// subsequent sentence)
+```bash
+apt-get -y install wget screen python    // for Debian / Ubuntu
+wget http://mirrors.linuxeye.com/oneinstack-full.tar.gz   // Contains the source code
+tar xzf oneinstack-full.tar.gz
+cd oneinstack    // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
+screen -S oneinstack    // If network interruption, you can execute the command `screen -r oneinstack` reconnect install window
+./install.sh   // Do not sh install.sh or bash install.sh such execution
+```
+
+## How to add Extensions 
+
+```bash
+cd ~/oneinstack    // Must enter the directory execution under oneinstack
+./addons.sh    // Do not sh addons.sh or bash addons.sh such execution
+
 ```
 
 ## How to add a virtual host
 
 ```bash
-   ./vhost.sh
+cd ~/oneinstack    // Must enter the directory execution under oneinstack
+./vhost.sh    // Do not sh vhost.sh or bash vhost.sh such execution
+```
+
+## How to delete a virtual host
+
+```bash
+cd ~/oneinstack
+./vhost.sh del
 ```
 
 ## How to add FTP virtual user
 
 ```bash
-   ./pureftpd_vhost.sh
+cd ~/oneinstack
+./pureftpd_vhost.sh
 ```
 
 ## How to backup
 
 ```bash
-   ./backup_setup.sh # Set backup options 
-   ./backup.sh # Start backup, You can add cron jobs
-   # crontab -l # Examples 
-     0 1 * * * cd ~/lempstack;./backup.sh  > /dev/null 2>&1 &
+cd ~/oneinstack
+./backup_setup.sh    // Backup parameters
+./backup.sh    // Perform the backup immediately
+crontab -l    // Can be added to scheduled tasks, such as automatic backups every day 1:00
+  0 1 * * * cd ~/oneinstack;./backup.sh  > /dev/null 2>&1 &
 ```
 
 ## How to manage service
-Nginx/Tengine:
+
+Nginx/Tengine/OpenResty:
 ```bash
-   service nginx {start|stop|status|restart|reload|configtest}
+service nginx {start|stop|status|restart|reload|configtest}
 ```
 MySQL/MariaDB/Percona:
 ```bash
-   service mysqld {start|stop|restart|reload|status}
+service mysqld {start|stop|restart|reload|status}
 ```
 PHP:
 ```bash
-   service php-fpm {start|stop|restart|reload|status}
+service php-fpm {start|stop|restart|reload|status}
+```
+HHVM:
+```bash
+service supervisord {start|stop|status|restart|reload}
+```
+Apache:
+```bash
+service httpd {start|restart|stop}
+```
+Tomcat:
+```bash
+service tomcat {start|stop|status|restart} 
 ```
 Pure-Ftpd:
 ```bash
-   service pureftpd {start|stop|restart|status}
+service pureftpd {start|stop|restart|status}
 ```
 Redis:
 ```bash
-   service redis-server {start|stop|status|restart|reload}
+service redis-server {start|stop|status|restart|reload}
 ```
 Memcached:
 ```bash
-   service memcached {start|stop|status|restart|reload}
+service memcached {start|stop|status|restart|reload}
 ```
 
 ## How to upgrade 
+
 ```bash
-   ./upgrade.sh
+./upgrade.sh
 ```
 
 ## How to uninstall 
 
 ```bash
-   ./uninstall.sh
+./uninstall.sh
 ```
 
 ## Installation
-   Follow the instructions in [Wiki Installation page](https://github.com/lj2007331/lempstack/wiki/Installation)<br />
 
-   For feedback, questions, and to follow the progress of the project: <br />
-   [LEMP stack](https://lempstack.com)<br />
+For feedback, questions, and to follow the progress of the project (Chinese): <br />
+[OneinStack](https://oneinstack.com)<br />
