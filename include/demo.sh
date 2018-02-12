@@ -19,11 +19,10 @@ DEMO() {
       unzip -q tz.zip -d ${wwwroot_dir}/default
     else
       src_url=http://mirrors.linuxeye.com/oneinstack/src/tz_e.zip && Download_src
-      unzip -q tz_e.zip -d ${wwwroot_dir}/default;/bin/mv ${wwwroot_dir}/default/{tz_e.php,proberv.php}
-      sed -i 's@https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js@http://lib.sinaapp.com/js/jquery/1.7/jquery.min.js@' ${wwwroot_dir}/default/proberv.php
+      unzip -q tz_e.zip -d ${wwwroot_dir}/default;/bin/mv ${wwwroot_dir}/default/{tz_e.php,prober.php}
     fi
 
-    echo '<?php phpinfo() ?>' > ${wwwroot_dir}/default/phpinfo.php
+    echo "<?php phpinfo() ?>" > ${wwwroot_dir}/default/phpinfo.php
     case "${PHP_cache}" in
       1)
         src_url=http://mirrors.linuxeye.com/oneinstack/src/ocp.php && Download_src

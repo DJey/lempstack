@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.com
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -12,7 +12,7 @@ export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 clear
 printf "
 #######################################################################
-#       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
+#       OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+      #
 #                 FTP virtual user account management                 #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
@@ -84,7 +84,7 @@ What Are You Doing?
 "
   read -p "Please input the correct option: " Number
   if [[ ! $Number =~ ^[1-6,q]$ ]]; then
-    echo "${CFAILURE}input error! Please only input 1 ~ 6 and q${CEND}"
+    echo "${CFAILURE}input error! Please only input 1~6 and q${CEND}"
   else
     case "$Number" in
     1)

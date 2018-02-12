@@ -11,13 +11,13 @@
 # Description:      redis-server - Persistent key-value db
 ### END INIT INFO
 
-
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/local/redis/bin/redis-server
 DAEMON_ARGS=/usr/local/redis/etc/redis.conf
 NAME=redis-server
 DESC=redis-server
-PIDFILE=/var/run/redis.pid
+PIDFILE=/var/run/redis/redis.pid
+PIDDIR=`dirname $PIDFILE`
 
 test -x $DAEMON || exit 0
 test -x $DAEMONBOOTSTRAP || exit 0
@@ -27,11 +27,13 @@ set -e
 case "$1" in
   start)
     echo -n "Starting $DESC: "
-    touch $PIDFILE
-    chown redis:redis $PIDFILE
+    # Make sure the default pidfile directory exists
+    if [ ! -d $PIDDIR ]; then
+      install -d -m 0755 -o redis -g redis $PIDDIR
+    fi
     if start-stop-daemon --start --quiet --pidfile $PIDFILE --chuid redis:redis --exec $DAEMON -- $DAEMON_ARGS
     then
-      echo "$NAME."
+      echo "[OK]"
     else
       echo "failed"
     fi
@@ -40,19 +42,30 @@ case "$1" in
     echo -n "Stopping $DESC: "
     if start-stop-daemon --stop --retry 10 --quiet --oknodo --pidfile $PIDFILE --exec $DAEMON
     then
-      echo "$NAME."
+      echo "[OK]"
     else
       echo "failed"
     fi
-    rm -f $PIDFILE
     ;;
+  status)
+    if [ ! -r $PIDFILE ] ; then
+      echo "redis-server is stopped"
+      exit 0
+    fi
 
+    PID=`cat $PIDFILE`
+    if ps -p $PID | grep -q $PID; then
+      echo "redis-server (pid $PID) is running..."
+    else
+      echo "redis-server dead but pid file exists"
+    fi
+    ;;
   restart|force-reload)
     ${0} stop
     ${0} start
     ;;
   *)
-    echo "Usage: /etc/init.d/$NAME {start|stop|restart|force-reload}" >&2
+    echo "Usage: /etc/init.d/$NAME {start|stop|restart|status|force-reload}" >&2
     exit 1
     ;;
 esac

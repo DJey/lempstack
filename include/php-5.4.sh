@@ -8,7 +8,7 @@
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
-Install_PHP-5-4() {
+Install_PHP54() {
   pushd ${oneinstack_dir}/src
   
   tar xzf libiconv-$libiconv_version.tar.gz
@@ -21,7 +21,7 @@ Install_PHP-5-4() {
   
   tar xzf curl-$curl_version.tar.gz
   pushd curl-$curl_version
-  ./configure --prefix=/usr/local
+  ./configure --prefix=/usr/local --with-ssl=${openssl_install_dir}
   make -j ${THREAD} && make install
   popd
   rm -rf curl-$curl_version
@@ -59,9 +59,9 @@ Install_PHP-5-4() {
   id -u $run_user >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin $run_user
   
-  tar xzf php-$php_4_version.tar.gz
-  patch -d php-$php_4_version -p0 < fpm-race-condition.patch
-  pushd php-$php_4_version
+  tar xzf php-$php54_version.tar.gz
+  patch -d php-$php54_version -p0 < fpm-race-condition.patch
+  pushd php-$php54_version
   make clean
   [ ! -d "$php_install_dir" ] && mkdir -p $php_install_dir
   if [[ $Apache_version =~ ^[1-2]$ ]] || [ -e "$apache_install_dir/bin/apxs" ]; then
@@ -72,9 +72,9 @@ Install_PHP-5-4() {
     --with-iconv-dir=/usr/local --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
     --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
     --enable-sysvsem --enable-inline-optimization --with-curl=/usr/local --enable-mbregex \
-    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf --with-openssl \
+    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf --with-openssl=${openssl_install_dir} \
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
-    --with-gettext --enable-zip --enable-soap --disable-ipv6 --disable-debug
+    --with-gettext --enable-zip --enable-soap --disable-debug $php_modules_options
   else
     ./configure --prefix=$php_install_dir --with-config-file-path=$php_install_dir/etc \
     --with-config-file-scan-dir=$php_install_dir/etc/php.d \
@@ -83,9 +83,9 @@ Install_PHP-5-4() {
     --with-iconv-dir=/usr/local --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
     --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
     --enable-sysvsem --enable-inline-optimization --with-curl=/usr/local --enable-mbregex \
-    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf --with-openssl \
+    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf --with-openssl=${openssl_install_dir} \
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
-    --with-gettext --enable-zip --enable-soap --disable-ipv6 --disable-debug
+    --with-gettext --enable-zip --enable-soap --disable-debug $php_modules_options
   fi
   make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
   make install
@@ -220,6 +220,6 @@ EOF
     service httpd restart
   fi
   popd
-  [ -e "$php_install_dir/bin/phpize" ] && rm -rf php-$php_4_version
+  [ -e "$php_install_dir/bin/phpize" ] && rm -rf php-$php54_version
   popd
 }

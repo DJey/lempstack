@@ -12,9 +12,12 @@ Upgrade_Redis() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -d "$redis_install_dir" ] && echo "${CWARNING}Redis is not installed on your system! ${CEND}" && exit 1
   OLD_Redis_version=`$redis_install_dir/bin/redis-cli --version | awk '{print $2}'`
+  Latest_Redis_version=`curl -s http://download.redis.io/redis-stable/00-RELEASENOTES | awk '/Released/{print $2}' | head -1`
+  [ -z "$Latest_Redis_version" ] && Latest_Redis_version=4.2.8
   echo "Current Redis Version: ${CMSG}$OLD_Redis_version${CEND}"
   while :; do echo
-    read -p "Please input upgrade Redis Version(example: 3.0.5): " NEW_Redis_version
+    read -p "Please input upgrade Redis Version(default: $Latest_Redis_version): " NEW_Redis_version
+    [ -z "$NEW_Redis_version" ] && NEW_Redis_version=$Latest_Redis_version
     if [ "$NEW_Redis_version" != "$OLD_Redis_version" ]; then
       [ ! -e "redis-$NEW_Redis_version.tar.gz" ] && wget --no-check-certificate -c http://download.redis.io/releases/redis-$NEW_Redis_version.tar.gz > /dev/null 2>&1
       if [ -e "redis-$NEW_Redis_version.tar.gz" ]; then
@@ -47,11 +50,12 @@ Upgrade_Redis() {
       service redis-server stop
       /bin/cp src/{redis-benchmark,redis-check-aof,redis-check-rdb,redis-cli,redis-sentinel,redis-server} $redis_install_dir/bin/
       service redis-server start
+      popd > /dev/null
       echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}$OLD_Redis_version${CEND} to ${CWARNING}$NEW_Redis_version${CEND}"
+      rm -rf redis-$NEW_Redis_version
     else
       echo "${CFAILURE}Upgrade Redis failed! ${CEND}"
     fi
-    popd > /dev/null
   fi
   popd > /dev/null
 }

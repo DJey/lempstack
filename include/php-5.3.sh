@@ -8,7 +8,7 @@
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
-Install_PHP-5-3() {
+Install_PHP53() {
   pushd ${oneinstack_dir}/src
   
   tar xzf libiconv-$libiconv_version.tar.gz
@@ -19,32 +19,13 @@ Install_PHP-5-3() {
   popd
   rm -rf libiconv-$libiconv_version
   
-  # Problem building php-5.3 with openssl
-  if [ "$Debian_version" == '8' -o "$Ubuntu_version" == '16' ]; then
-    if [ ! -e '/usr/local/openssl/lib/libcrypto.a' ]; then
-      tar xzf openssl-1.0.0s.tar.gz
-      pushd openssl-1.0.0s
-      ./config --prefix=/usr/local/openssl -fPIC shared zlib
-      make -j ${THREAD} && make install
-      popd 
-      rm -rf openssl-1.0.0s
-    fi
-    OpenSSL_args='--with-openssl=/usr/local/openssl'
-  else
-    OpenSSL_args='--with-openssl'
-  fi
-  
   tar xzf curl-$curl_version.tar.gz
   pushd curl-$curl_version
-  if [ "$Debian_version" == '8' -o "$Ubuntu_version" == '16' ]; then
-    LDFLAGS="-Wl,-rpath=/usr/local/openssl/lib" ./configure --prefix=/usr/local --with-ssl=/usr/local/openssl
-  else
-    ./configure --prefix=/usr/local
-  fi
+  ./configure --prefix=/usr/local --with-ssl=${openssl_install_dir}
   make -j ${THREAD} && make install
   popd
   rm -rf curl-$curl_version
-  
+
   tar xzf libmcrypt-$libmcrypt_version.tar.gz
   pushd libmcrypt-$libmcrypt_version
   ./configure
@@ -80,9 +61,9 @@ Install_PHP-5-3() {
   id -u $run_user >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin $run_user
   
-  tar xzf php-$php_3_version.tar.gz
-  patch -d php-$php_3_version -p0 < fpm-race-condition.patch
-  pushd php-$php_3_version
+  tar xzf php-$php53_version.tar.gz
+  patch -d php-$php53_version -p0 < fpm-race-condition.patch
+  pushd php-$php53_version
   patch -p1 < ../php5.3patch
   patch -p1 < ../debian_patches_disable_SSLv2_for_openssl_1_0_0.patch
   make clean
@@ -95,9 +76,9 @@ Install_PHP-5-3() {
     --with-iconv-dir=/usr/local --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
     --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
     --enable-sysvsem --enable-inline-optimization --with-curl=/usr/local --enable-mbregex \
-    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf $OpenSSL_args \
+    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf --with-openssl=${openssl_install_dir} \
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
-    --with-gettext --enable-zip --enable-soap --disable-ipv6 --disable-debug
+    --with-gettext --enable-zip --enable-soap --disable-debug $php_modules_options
   else
     ./configure --prefix=$php_install_dir --with-config-file-path=$php_install_dir/etc \
     --with-config-file-scan-dir=$php_install_dir/etc/php.d \
@@ -106,9 +87,9 @@ Install_PHP-5-3() {
     --with-iconv-dir=/usr/local --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
     --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
     --enable-sysvsem --enable-inline-optimization --with-curl=/usr/local --enable-mbregex \
-    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf $OpenSSL_args \
+    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf --with-openssl=${openssl_install_dir} \
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
-    --with-gettext --enable-zip --enable-soap --disable-ipv6 --disable-debug
+    --with-gettext --enable-zip --enable-soap --disable-debug $php_modules_options
   fi
   sed -i '/^BUILD_/ s/\$(CC)/\$(CXX)/g' Makefile
   make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
@@ -244,6 +225,6 @@ EOF
     service httpd restart
   fi
   popd
-  [ -e "$php_install_dir/bin/phpize" ] && rm -rf php-$php_3_version
+  [ -e "$php_install_dir/bin/phpize" ] && rm -rf php-$php53_version
   popd
 }

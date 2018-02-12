@@ -22,7 +22,7 @@ Install_redis-server() {
     /bin/cp src/{redis-benchmark,redis-check-aof,redis-check-rdb,redis-cli,redis-sentinel,redis-server} ${redis_install_dir}/bin/
     /bin/cp redis.conf ${redis_install_dir}/etc/
     ln -s ${redis_install_dir}/bin/* /usr/local/bin/
-    sed -i 's@pidfile.*@pidfile /var/run/redis.pid@' ${redis_install_dir}/etc/redis.conf
+    sed -i 's@pidfile.*@pidfile /var/run/redis/redis.pid@' ${redis_install_dir}/etc/redis.conf
     sed -i "s@logfile.*@logfile ${redis_install_dir}/var/redis.log@" ${redis_install_dir}/etc/redis.conf
     sed -i "s@^dir.*@dir ${redis_install_dir}/var@" ${redis_install_dir}/etc/redis.conf
     sed -i 's@daemonize no@daemonize yes@' ${redis_install_dir}/etc/redis.conf
@@ -34,7 +34,7 @@ Install_redis-server() {
     rm -rf redis-${redis_version}
     id -u redis >/dev/null 2>&1
     [ $? -ne 0 ] && useradd -M -s /sbin/nologin redis
-    chown -R redis:redis ${redis_install_dir}/var
+    chown -R redis:redis ${redis_install_dir}/{var,etc}
     /bin/cp ../init.d/Redis-server-init /etc/init.d/redis-server
     if [ "$OS" == 'CentOS' ]; then
       cc start-stop-daemon.c -o /sbin/start-stop-daemon
@@ -57,15 +57,10 @@ Install_redis-server() {
 
 Install_php-redis() {
   pushd ${oneinstack_dir}/src
-  phpExtensionDir=`${php_install_dir}/bin/php-config --extension-dir`
   if [ -e "${php_install_dir}/bin/phpize" ]; then
-    if [ "`${php_install_dir}/bin/php -r 'echo PHP_VERSION;' | awk -F. '{print $1}'`" == '7' ]; then
-      tar xzf redis-${redis_pecl_for_php7_version}.tgz
-      pushd redis-${redis_pecl_for_php7_version}
-    else
-      tar xzf redis-$redis_pecl_version.tgz
-      pushd redis-$redis_pecl_version
-    fi
+    phpExtensionDir=`${php_install_dir}/bin/php-config --extension-dir`
+    tar xzf redis-$redis_pecl_version.tgz
+    pushd redis-$redis_pecl_version
     ${php_install_dir}/bin/phpize
     ./configure --with-php-config=${php_install_dir}/bin/php-config
     make -j ${THREAD} && make install
@@ -73,7 +68,7 @@ Install_php-redis() {
       echo 'extension=redis.so' > ${php_install_dir}/etc/php.d/ext-redis.ini
       echo "${CSUCCESS}PHP Redis module installed successfully! ${CEND}"
       popd
-      rm -rf redis-${redis_pecl_for_php7_version} redis-$redis_pecl_version
+      rm -rf redis-$redis_pecl_version
     else
       echo "${CFAILURE}PHP Redis module install failed, Please contact the author! ${CEND}"
     fi

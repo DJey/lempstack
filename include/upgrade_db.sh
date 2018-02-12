@@ -21,7 +21,7 @@ Upgrade_DB() {
     DB=Percona
     OLD_DB_version=$OLD_DB_version_tmp
   else
-    [ "$IPADDR_COUNTRY"x == "CN"x ] && DOWN_ADDR=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads || DOWN_ADDR=http://cdn.mysql.com/Downloads
+    [ "$IPADDR_COUNTRY"x == "CN"x ] && DOWN_ADDR=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads || DOWN_ADDR=http://cdn.mysql.com/Downloads
     DB=MySQL
     OLD_DB_version=$OLD_DB_version_tmp
   fi
@@ -53,10 +53,6 @@ Upgrade_DB() {
   #upgrade
   echo
   echo "Current $DB Version: ${CMSG}$OLD_DB_version${CEND}"
-  [ -e /usr/local/lib/libjemalloc.so ] && { je_tc_malloc=1; EXE_LINKER="-DCMAKE_EXE_LINKER_FLAGS='-ljemalloc'"; }
-  [ -e /usr/local/lib/libtcmalloc.so ] && { je_tc_malloc=2; EXE_LINKER="-DCMAKE_EXE_LINKER_FLAGS='-ltcmalloc'"; }
-  [ -e /usr/local/lib/libjemalloc.so -a -e /usr/local/lib/libtcmalloc.so ] && { je_tc_malloc=1; EXE_LINKER="-DCMAKE_EXE_LINKER_FLAGS='-ljemalloc'"; }
-  
   while :; do echo
     read -p "Please input upgrade $DB Version(example: $OLD_DB_version): " NEW_DB_version
     if [ `echo $NEW_DB_version | awk -F. '{print $1"."$2}'` == `echo $OLD_DB_version | awk -F. '{print $1"."$2}'` ]; then
@@ -67,11 +63,10 @@ Upgrade_DB() {
         DB_name=percona-server-$NEW_DB_version
         DB_URL=http://www.percona.com/redir/downloads/Percona-Server-`echo $NEW_DB_version | awk -F. '{print $1"."$2}'`/LATEST/source/tarball/$DB_name.tar.gz
       elif [ "$DB" == 'MySQL' ]; then
-        [ `echo $NEW_DB_version | awk -F. '{print $1"."$2}'` != '5.5' ] && DB_name=mysql-${NEW_DB_version}-linux-glibc2.5-${SYS_BIT_b} || DB_name=mysql-${NEW_DB_version}-linux2.6-${SYS_BIT_b}
+        DB_name=mysql-${NEW_DB_version}-linux-glibc2.12-${SYS_BIT_b}
         DB_URL=$DOWN_ADDR/MySQL-`echo $NEW_DB_version | awk -F. '{print $1"."$2}'`/$DB_name.tar.gz
       fi
         [ ! -e "$DB_name.tar.gz" ] && wget --no-check-certificate -c $DB_URL > /dev/null 2>&1
-
         if [ -e "$DB_name.tar.gz" ]; then
           echo "Download [${CMSG}$DB_name.tar.gz${CEND}] successfully! "
         else
@@ -95,11 +90,7 @@ Upgrade_DB() {
       tar xzf $DB_name.tar.gz
       [ ! -d "$mariadb_install_dir" ] && mkdir -p $mariadb_install_dir
       mv mariadb-${NEW_DB_version}-*-${SYS_BIT_b}/* $mariadb_install_dir
-      if [ "$je_tc_malloc" == '1' -a "`echo $OLD_DB_version_tmp | awk -F'.' '{print $1"."$2}'`" != '10.1' ]; then
-        sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' $mariadb_install_dir/bin/mysqld_safe
-      elif [ "$je_tc_malloc" == '2' -a "`echo $OLD_DB_version_tmp | awk -F'.' '{print $1"."$2}'`" != '10.1' ]; then
-        sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libtcmalloc.so@' $mariadb_install_dir/bin/mysqld_safe
-      fi
+      sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' $mariadb_install_dir/bin/mysqld_safe
       $mariadb_install_dir/scripts/mysql_install_db --user=mysql --basedir=$mariadb_install_dir --datadir=$mariadb_data_dir
       chown mysql.mysql -R $mariadb_data_dir
       service mysqld start
@@ -109,7 +100,7 @@ Upgrade_DB() {
       $mariadb_install_dir/bin/mysql -uroot -p${dbrootpwd} -e "reset master;" >/dev/null 2>&1
       [ $? -eq 0 ] &&  echo "You have ${CMSG}successfully${CEND} upgrade from ${CMSG}$OLD_DB_version${CEND} to ${CMSG}$NEW_DB_version${CEND}"
     elif [ "$DB" == 'Percona' ]; then
-      tar zxf $DB_name.tar.gz
+      tar xzf $DB_name.tar.gz
       pushd $DB_name
       make clean
       if [ "`echo $NEW_DB_version | awk -F. '{print $1"."$2}'`" == '5.5' ]; then
@@ -127,7 +118,7 @@ Upgrade_DB() {
         -DENABLED_LOCAL_INFILE=1 \
         -DDEFAULT_CHARSET=utf8mb4 \
         -DDEFAULT_COLLATION=utf8mb4_general_ci \
-        $EXE_LINKER
+        -DCMAKE_EXE_LINKER_FLAGS='-ljemalloc'
       else
         cmake . -DCMAKE_INSTALL_PREFIX=$percona_install_dir \
         -DMYSQL_DATADIR=$percona_data_dir \
@@ -142,7 +133,7 @@ Upgrade_DB() {
         -DENABLE_DTRACE=0 \
         -DDEFAULT_CHARSET=utf8mb4 \
         -DDEFAULT_COLLATION=utf8mb4_general_ci \
-        $EXE_LINKER
+        -DCMAKE_EXE_LINKER_FLAGS='-ljemalloc'
       fi
       make -j ${THREAD}
       service mysqld stop
@@ -165,15 +156,15 @@ Upgrade_DB() {
       $percona_install_dir/bin/mysql -uroot -p${dbrootpwd} -e "reset master;" >/dev/null 2>&1
       [ $? -eq 0 ] &&  echo "You have ${CMSG}successfully${CEND} upgrade from ${CMSG}$OLD_DB_version${CEND} to ${CMSG}$NEW_DB_version${CEND}"
     elif [ "$DB" == 'MySQL' ]; then
-      tar zxf $DB_name.tar.gz
+      tar xzf $DB_name.tar.gz
       service mysqld stop
       mv ${mysql_install_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       mv ${mysql_data_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       [ ! -d "$mysql_install_dir" ] && mkdir -p $mysql_install_dir
       mkdir -p $mysql_data_dir;chown mysql.mysql -R $mysql_data_dir
       mv $DB_name/* $mysql_install_dir/
-      [ "$je_tc_malloc" == '1' ] && sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' $mysql_install_dir/bin/mysqld_safe
-      [ "$je_tc_malloc" == '2' ] && sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libtcmalloc.so@' $mysql_install_dir/bin/mysqld_safe
+      sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' $mysql_install_dir/bin/mysqld_safe
+      sed -i "s@/usr/local/mysql@${mysql_install_dir}@g" ${mysql_install_dir}/bin/mysqld_safe
       [ "`echo $NEW_DB_version | awk -F. '{print $1"."$2}'`" != '5.7' ] && $mysql_install_dir/scripts/mysql_install_db --user=mysql --basedir=$mysql_install_dir --datadir=$mysql_data_dir
       [ "`echo $NEW_DB_version | awk -F. '{print $1"."$2}'`" == '5.7' ] && $mysql_install_dir/bin/mysqld --initialize-insecure --user=mysql --basedir=$mysql_install_dir --datadir=$mysql_data_dir
 
