@@ -6,11 +6,11 @@ Script properties:
 - Continually updated, Provide Shell Interaction and Autoinstall
 - Source compiler installation, most stable source is the latest version, and download from the official site
 - Some security optimization
-- Providing a plurality of database versions (MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-10.1, MariaDB-10.0, MariaDB-5.5, Percona-5.7, Percona-5.6, Percona-5.5, AliSQL-5.6, PostgreSQL, MongoDB)
+- Providing a plurality of database versions (MySQL-8.0, MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-10.1, MariaDB-10.0, MariaDB-5.5, Percona-5.7, Percona-5.6, Percona-5.5, AliSQL-5.6, PostgreSQL, MongoDB)
 - Providing multiple PHP versions (PHP-7.2, PHP-7.1, PHP-7.0, PHP-5.6, PHP-5.5, PHP-5.4, PHP-5.3)
 - Provide Nginx, Tengine, OpenResty
-- Providing a plurality of Tomcat version (Tomcat-8, Tomcat-7, Tomcat-6)
-- Providing a plurality of JDK version (JDK-1.8, JDK-1.7, JDK-1.6)
+- Providing a plurality of Tomcat version (Tomcat-9, Tomcat-8, Tomcat-7, Tomcat-6)
+- Providing a plurality of JDK version (JDK-9, JDK-1.8, JDK-1.7, JDK-1.6)
 - Providing a plurality of Apache version (Apache-2.4, Apache-2.2)
 - According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php encryption and decryption tool ionCube, ZendGuardLoader, swoole, xdebug, Composer
 - Installation Pureftpd, phpMyAdmin according to their needs
@@ -21,7 +21,7 @@ Script properties:
 - Provide local backup,remote backup (rsync between servers),Aliyun OSS,Qcloud COS and UPYUN script
 - Provided under HHVM install CentOS 6,7
 
-## How to use 
+## How to use
 
 If your server system: CentOS/Redhat (Do not enter "//" and "// subsequent sentence)
 ```bash
@@ -42,7 +42,7 @@ screen -S oneinstack    // If network interruption, you can execute the command 
 ./install.sh   // Do not sh install.sh or bash install.sh such execution
 ```
 
-## How to add Extensions 
+## How to add Extensions
 
 ```bash
 cd ~/oneinstack    // Must enter the directory execution under oneinstack
@@ -93,11 +93,11 @@ service mysqld {start|stop|restart|reload|status}
 ```
 PostgreSQL:
 ```bash
-service postgresql {start|stop|restart|status} 
+service postgresql {start|stop|restart|status}
 ```
 MongoDB:
 ```bash
-service mongod {start|stop|status|restart|reload} 
+service mongod {start|stop|status|restart|reload}
 ```
 PHP:
 ```bash
@@ -113,7 +113,7 @@ service httpd {start|restart|stop}
 ```
 Tomcat:
 ```bash
-service tomcat {start|stop|status|restart} 
+service tomcat {start|stop|status|restart}
 ```
 Pure-Ftpd:
 ```bash
@@ -128,13 +128,13 @@ Memcached:
 service memcached {start|stop|status|restart|reload}
 ```
 
-## How to upgrade 
+## How to upgrade
 
 ```bash
 ./upgrade.sh
 ```
 
-## How to uninstall 
+## How to uninstall
 
 ```bash
 ./uninstall.sh

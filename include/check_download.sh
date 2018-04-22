@@ -13,6 +13,7 @@ checkDownload() {
   # General system utils
   echo "Download openSSL..."
   src_url=https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz && Download_src
+  echo "Download cacert.pem..."
   src_url=http://curl.haxx.se/ca/cacert.pem && Download_src
 
   # Web
@@ -40,10 +41,10 @@ checkDownload() {
     # apache
     if [ "${apache_option}" == '1' ]; then
       echo "Download apache 2.4..."
+      src_url=http://archive.apache.org/dist/httpd/httpd-${apache24_ver}.tar.gz && Download_src
       src_url=http://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
       src_url=http://archive.apache.org/dist/apr/apr-util-${apr_util_ver}.tar.gz && Download_src
       src_url=http://mirrors.linuxeye.com/apache/httpd/nghttp2-${nghttp2_ver}.tar.gz && Download_src
-      src_url=http://archive.apache.org/dist/httpd/httpd-${apache24_ver}.tar.gz && Download_src
     fi
     if [ "${apache_option}" == '2' ]; then
       echo "Download apache 2.2..."
@@ -56,46 +57,55 @@ checkDownload() {
     # tomcat
     case "${tomcat_option}" in
       1)
+        echo "Download tomcat 9..."
+        src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat9_ver}/apache-tomcat-${tomcat9_ver}.tar.gz && Download_src
+        src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat9_ver}/catalina-jmx-remote.jar && Download_src
+        ;;
+      2)
         echo "Download tomcat 8..."
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat8_ver}/apache-tomcat-${tomcat8_ver}.tar.gz && Download_src
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat8_ver}/catalina-jmx-remote.jar && Download_src
         ;;
-      2)
+      3)
         echo "Download tomcat 7..."
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat7_ver}/apache-tomcat-${tomcat7_ver}.tar.gz && Download_src
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat7_ver}/catalina-jmx-remote.jar && Download_src
         ;;
-      3)
+      4)
         echo "Download tomcat 6..."
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat6_ver}/apache-tomcat-${tomcat6_ver}.tar.gz && Download_src
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat6_ver}/catalina-jmx-remote.jar && Download_src
         ;;
     esac
 
-    if [[ "${jdk_option}"  =~ ^[1-3]$ ]]; then
+    if [[ "${jdk_option}"  =~ ^[1-4]$ ]]; then
       case "${jdk_option}" in
         1)
-          echo "Download JDK 1.8..."
-          JDK_FILE="jdk-$(echo ${jdk18_ver} | awk -F. '{print $2}')u$(echo ${jdk18_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIG_FLAG}.tar.gz"
+          echo "Download JDK 9..."
+          JDK_FILE="jdk-${jdk9_ver}_linux-${SYS_BIT_j}_bin.tar.gz"
           ;;
         2)
-          echo "Download JDK 1.7..."
-          JDK_FILE="jdk-$(echo ${jdk17_ver} | awk -F. '{print $2}')u$(echo ${jdk17_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIG_FLAG}.tar.gz"
+          echo "Download JDK 1.8..."
+          JDK_FILE="jdk-$(echo ${jdk18_ver} | awk -F. '{print $2}')u$(echo ${jdk18_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIT_j}.tar.gz"
           ;;
         3)
+          echo "Download JDK 1.7..."
+          JDK_FILE="jdk-$(echo ${jdk17_ver} | awk -F. '{print $2}')u$(echo ${jdk17_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIT_j}.tar.gz"
+          ;;
+        4)
           echo "Download JDK 1.6..."
-          JDK_FILE="jdk-$(echo ${jdk16_ver} | awk -F. '{print $2}')u$(echo ${jdk16_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIG_FLAG}.bin"
+          JDK_FILE="jdk-$(echo ${jdk16_ver} | awk -F. '{print $2}')u$(echo ${jdk16_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIT_j}.bin"
           ;;
       esac
+      src_url=http://mirrors.linuxeye.com/jdk/${JDK_FILE} && Download_src
       echo "Download apr..."
       src_url=http://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
-      # start download...
-      src_url=http://mirrors.linuxeye.com/jdk/${JDK_FILE} && Download_src
     fi
   fi
 
   if [ "${db_yn}" == 'y' ]; then
-    if [[ "${db_option}" =~ ^[1,4,8]$ ]] && [ "${dbinstallmethod}" == "2" ]; then
+    if [[ "${db_option}" =~ ^[1,2,5,6,9]$ ]] && [ "${dbinstallmethod}" == "2" ]; then
+      [[ "${db_option}" =~ ^[2,5,6,9]$ ]] && boost_ver=${boost_oldver} 
       echo "Download boost..."
       [ "${IPADDR_COUNTRY}"x == "CN"x ] && DOWN_ADDR_BOOST=${mirrorLink} || DOWN_ADDR_BOOST=http://downloads.sourceforge.net/project/boost/boost/${boost_ver}
       boostVersion2=$(echo ${boost_ver} | awk -F. '{print $1}')_$(echo ${boost_ver} | awk -F. '{print $2}')_$(echo ${boost_ver} | awk -F. '{print $3}')
@@ -104,10 +114,46 @@ checkDownload() {
 
     case "${db_option}" in
       1)
+        # MySQL 8.0 
+        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+          DOWN_ADDR_MYSQL=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL_BK=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL_BK2=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-8.0
+        else
+          DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-8.0
+        fi
+
+        if [ "${dbinstallmethod}" == '1' ]; then
+          echo "Download MySQL 8.0 binary package..."
+          FILE_NAME=mysql-${mysql80_ver}-linux-glibc2.12-${SYS_BIT_b}.tar.gz
+        elif [ "${dbinstallmethod}" == '2' ]; then
+          echo "Download MySQL 8.0 source package..."
+          FILE_NAME=mysql-${mysql80_ver}.tar.gz
+        fi
+        # start download
+        src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME} && Download_src
+        src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME}.md5 && Download_src
+        # verifying download
+        MYSQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
+        [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
+        tryDlCount=0
+        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
+          wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
+          let "tryDlCount++"
+          [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
+        done
+        if [ "${tryDlCount}" == '6' ]; then
+          echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
+          kill -9 $$
+        fi
+        ;;
+      2)
         # MySQL 5.7
         if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-          DOWN_ADDR_MYSQL=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
-          DOWN_ADDR_MYSQL_BK=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.7
+          DOWN_ADDR_MYSQL=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.7
+          DOWN_ADDR_MYSQL_BK=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-5.7
+          DOWN_ADDR_MYSQL_BK2=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
         else
           DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.7
           DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.7
@@ -135,15 +181,14 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      2)
+      3)
         # MySQL 5.6
         if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-          DOWN_ADDR_MYSQL=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
-          DOWN_ADDR_MYSQL_BK=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.6
+          DOWN_ADDR_MYSQL=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.6
+          DOWN_ADDR_MYSQL_BK=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-5.6
+          DOWN_ADDR_MYSQL_BK2=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
         else
           DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.6
           DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.6
@@ -171,15 +216,14 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      3)
+      4)
         # MySQL 5.5
         if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-          DOWN_ADDR_MYSQL=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
-          DOWN_ADDR_MYSQL_BK=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.5
+          DOWN_ADDR_MYSQL=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.5
+          DOWN_ADDR_MYSQL_BK=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-5.5
+          DOWN_ADDR_MYSQL_BK2=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
         else
           DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.5
           DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.5
@@ -208,18 +252,16 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      4)
+      5)
         # MariaDB 10.2
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download MariaDB 10.2 binary package..."
           FILE_NAME=mariadb-${mariadb102_ver}-${GLIBC_FLAG}-${SYS_BIT_b}.tar.gz
           if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            DOWN_ADDR_MARIADB=https://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb102_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
-            DOWN_ADDR_MARIADB_BK=https://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb102_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb102_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb102_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
           else
             DOWN_ADDR_MARIADB=http://ftp.osuosl.org/pub/mariadb/mariadb-${mariadb102_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
             DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb102_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
@@ -228,8 +270,8 @@ checkDownload() {
           echo "Download MariaDB 10.2 source package..."
           FILE_NAME=mariadb-${mariadb102_ver}.tar.gz
           if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            DOWN_ADDR_MARIADB=https://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb102_ver}/source
-            DOWN_ADDR_MARIADB_BK=https://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb102_ver}/source
+            DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb102_ver}/source
+            DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb102_ver}/source
           else
             DOWN_ADDR_MARIADB=http://ftp.osuosl.org/pub/mariadb/mariadb-${mariadb102_ver}/source
             DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb102_ver}/source
@@ -248,18 +290,16 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      5)
+      6)
         # MariaDB 10.1
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download MariaDB 10.1 binary package..."
           FILE_NAME=mariadb-${mariadb101_ver}-${GLIBC_FLAG}-${SYS_BIT_b}.tar.gz
           if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            DOWN_ADDR_MARIADB=https://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb101_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
-            DOWN_ADDR_MARIADB_BK=https://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb101_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb101_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb101_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
           else
             DOWN_ADDR_MARIADB=http://ftp.osuosl.org/pub/mariadb/mariadb-${mariadb101_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
             DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb101_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
@@ -268,8 +308,8 @@ checkDownload() {
           echo "Download MariaDB 10.1 source package..."
           FILE_NAME=mariadb-${mariadb101_ver}.tar.gz
           if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            DOWN_ADDR_MARIADB=https://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb101_ver}/source
-            DOWN_ADDR_MARIADB_BK=https://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb101_ver}/source
+            DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb101_ver}/source
+            DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb101_ver}/source
           else
             DOWN_ADDR_MARIADB=http://ftp.osuosl.org/pub/mariadb/mariadb-${mariadb101_ver}/source
             DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb101_ver}/source
@@ -288,18 +328,16 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      6)
+      7)
         # MariaDB 10.0
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download MariaDB 10.0 binary package..."
           FILE_NAME=mariadb-${mariadb100_ver}-${GLIBC_FLAG}-${SYS_BIT_b}.tar.gz
           if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            DOWN_ADDR_MARIADB=https://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb100_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
-            DOWN_ADDR_MARIADB_BK=https://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb100_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb100_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb100_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
           else
             DOWN_ADDR_MARIADB=http://ftp.osuosl.org/pub/mariadb/mariadb-${mariadb100_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
             DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb100_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
@@ -308,8 +346,8 @@ checkDownload() {
           echo "Download MariaDB 10.0 source package..."
           FILE_NAME=mariadb-${mariadb100_ver}.tar.gz
           if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            DOWN_ADDR_MARIADB=https://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb100_ver}/source
-            DOWN_ADDR_MARIADB_BK=https://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb100_ver}/source
+            DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb100_ver}/source
+            DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb100_ver}/source
           else
             DOWN_ADDR_MARIADB=http://ftp.osuosl.org/pub/mariadb/mariadb-${mariadb100_ver}/source
             DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb100_ver}/source
@@ -328,18 +366,16 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      7)
+      8)
         # MariaDB 5.5
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download MariaDB 5.5 binary package..."
           FILE_NAME=mariadb-${mariadb55_ver}-${GLIBC_FLAG}-${SYS_BIT_b}.tar.gz
           if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            DOWN_ADDR_MARIADB=https://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb55_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
-            DOWN_ADDR_MARIADB_BK=https://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb55_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb55_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb55_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
           else
             DOWN_ADDR_MARIADB=http://ftp.osuosl.org/pub/mariadb/mariadb-${mariadb55_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
             DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb55_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}
@@ -348,8 +384,8 @@ checkDownload() {
           echo "Download MariaDB 5.5 source package..."
           FILE_NAME=mariadb-${mariadb55_ver}.tar.gz
           if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            DOWN_ADDR_MARIADB=https://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb55_ver}/source
-            DOWN_ADDR_MARIADB_BK=https://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb55_ver}/source
+            DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb55_ver}/source
+            DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb55_ver}/source
           else
             DOWN_ADDR_MARIADB=http://ftp.osuosl.org/pub/mariadb/mariadb-${mariadb55_ver}/source
             DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb55_ver}/source
@@ -368,11 +404,9 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      8)
+      9)
         # Precona 5.7
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download Percona 5.7 binary package..."
@@ -389,9 +423,9 @@ checkDownload() {
         fi
         # start download
         src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src
-        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5 && Download_src
+        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum && Download_src
         # verifying download
-        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
+        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum |  grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
@@ -402,11 +436,9 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      9)
+      10)
         # Precona 5.6
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download Percona 5.6 binary package..."
@@ -424,9 +456,9 @@ checkDownload() {
         fi
         # start download
         src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src
-        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5 && Download_src
+        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum && Download_src
         # verifying download
-        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
+        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum |  grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
@@ -437,11 +469,9 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      10)
+      11)
         # Percona 5.5
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download Percona 5.5 binary package..."
@@ -459,9 +489,9 @@ checkDownload() {
         fi
         # start download
         src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src
-        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5 && Download_src
+        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum && Download_src
         # verifying download
-        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
+        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum |  grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
@@ -472,11 +502,9 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      11)
+      12)
         # AliSQL 5.6
         DOWN_ADDR_ALISQL=$mirrorLink
         echo "Download AliSQL 5.6 source package..."
@@ -489,7 +517,7 @@ checkDownload() {
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${ALISQL_TAR_MD5}" ] && break || continue
         done
         ;;
-      12)
+      13)
         # PostgreSQL
         echo "Download PostgreSQL source package..."
         FILE_NAME=postgresql-${pgsql_ver}.tar.gz
@@ -513,11 +541,9 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
-      13)
+      14)
         # MongoDB
         echo "Download MongoDB binary package..."
         FILE_NAME=mongodb-linux-${SYS_BIT_b}-${mongodb_ver}.tgz
@@ -539,8 +565,6 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$
-        else
-          echo "[${CMSG}${FILE_NAME}${CEND}] found."
         fi
         ;;
     esac
@@ -583,6 +607,8 @@ checkDownload() {
         ;;
       7)
         src_url=http://www.php.net/distributions/php-${php72_ver}.tar.gz && Download_src
+        src_url=http://mirrors.linuxeye.com/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
+        src_url=http://mirrors.linuxeye.com/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
         ;;
     esac
   fi
@@ -691,7 +717,11 @@ checkDownload() {
 
   if [ "${phpmyadmin_yn}" == 'y' ]; then
     echo "Download phpMyAdmin..."
-    src_url=https://files.phpmyadmin.net/phpMyAdmin/${phpmyadmin_ver}/phpMyAdmin-${phpmyadmin_ver}-all-languages.tar.gz && Download_src
+    if [[ "${php_option}" =~ ^[1-2]$ ]]; then
+      src_url=https://files.phpmyadmin.net/phpMyAdmin/${phpmyadmin_oldver}/phpMyAdmin-${phpmyadmin_oldver}-all-languages.tar.gz && Download_src
+    else
+      src_url=https://files.phpmyadmin.net/phpMyAdmin/${phpmyadmin_ver}/phpMyAdmin-${phpmyadmin_ver}-all-languages.tar.gz && Download_src
+    fi
   fi
 
   if [ "${redis_yn}" == 'y' ]; then
