@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -16,6 +16,8 @@ Install_OpenResty() {
   tar xzf pcre-${pcre_ver}.tar.gz
   tar xzf openresty-${openresty_ver}.tar.gz
   tar xzf openssl-${openssl_ver}.tar.gz
+  [ "${Fedora_ver}" == '28' ] && patch -d openresty-${openresty_ver}/bundle/nginx-1.13.6 -p1 < 0001-unix-ngx_user-Apply-fix-for-really-old-bug-in-glibc-.patch
+  patch -d openresty-${openresty_ver}/bundle/nginx-1.13.6 -p0 < nginx-auto-cc-gcc.patch
   pushd openresty-${openresty_ver}
 
   # close debug
@@ -46,8 +48,8 @@ Install_OpenResty() {
     sed -i "s@/usr/local/nginx@${openresty_install_dir}/nginx@g" /lib/systemd/system/nginx.service
     systemctl enable nginx
   else
-    [ "${OS}" == 'CentOS' ] && { /bin/cp ../init.d/Nginx-init-CentOS /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${openresty_install_dir}/nginx@g" /etc/init.d/nginx; chkconfig --add nginx; chkconfig nginx on; }
-    [[ ${OS} =~ ^Ubuntu$|^Debian$ ]] && { /bin/cp ../init.d/Nginx-init-Ubuntu /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${openresty_install_dir}/nginx@g" /etc/init.d/nginx; update-rc.d nginx defaults; }
+    [ "${PM}" == 'yum' ] && { /bin/cp ../init.d/Nginx-init-CentOS /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${openresty_install_dir}/nginx@g" /etc/init.d/nginx; chkconfig --add nginx; chkconfig nginx on; }
+    [ "${PM}" == 'apt' ] && { /bin/cp ../init.d/Nginx-init-Ubuntu /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${openresty_install_dir}/nginx@g" /etc/init.d/nginx; update-rc.d nginx defaults; }
   fi
 
   mv ${openresty_install_dir}/nginx/conf/nginx.conf{,_bk}

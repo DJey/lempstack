@@ -30,7 +30,6 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/get_char.sh
 
 ssh_port=22
-phpcache_option=1
 dbrootpwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbpostgrespwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbmongopwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
@@ -98,10 +97,9 @@ while :; do
       php_option=$2; shift 2
       [[ ! ${php_option} =~ ^[1-7]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~7${CEND}"; exit 1; }
       php_yn=y
-      [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; php_yn=Other; }
+      [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; php_option=Other; }
       ;;
     --phpcache_option)
-      [[ ! ${phpcache_option} =~ ^[1-4]$ ]] && { echo "${CWARNING}phpcache_option input error! Please only input number 1~4${CEND}"; exit 1; }
       phpcache_option=$2; shift 2
       ;;
     --php_extensions)
@@ -125,11 +123,11 @@ while :; do
       db_option=$2; shift 2
       db_yn=y
       if [[ "${db_option}" =~ ^[1-9]$|^1[0-3]$ ]]; then
-        [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; db_yn=Other; }
+        [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; db_option=Other; }
       elif [ "${db_option}" == '14' ]; then
-        [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; db_yn=Other; }
+        [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; db_option=Other; }
       elif [ "${db_option}" == '15' ]; then
-        [ -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}MongoDB already installed! ${CEND}"; db_yn=Other; }
+        [ -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}MongoDB already installed! ${CEND}"; db_option=Other; }
       else
         echo "${CWARNING}db_option input error! Please only input number 1~15${CEND}"
         exit 1
@@ -242,92 +240,92 @@ if [ ${ARG_NUM} == 0 ]; then
           fi
         done
         # Apache
-        #while :; do echo
-        #  echo 'Please select Apache server:'
-        #  echo -e "\t${CMSG}1${CEND}. Install Apache-2.4"
-        #  echo -e "\t${CMSG}2${CEND}. Install Apache-2.2"
-        #  echo -e "\t${CMSG}3${CEND}. Do not install"
-        #  read -p "Please input a number:(Default 3 press Enter) " apache_option
-        #  [ -z "${apache_option}" ] && apache_option=3
-        #  if [[ ! ${apache_option} =~ ^[1-3]$ ]]; then
-        #    echo "${CWARNING}input error! Please only input number 1~3${CEND}"
-        #  else
-        #    [ "${apache_option}" != '3' -a -e "${apache_install_dir}/conf/httpd.conf" ] && { echo "${CWARNING}Aapche already installed! ${CEND}"; apache_option=Other; }
-        #    break
-        #  fi
-        #done
+        while :; do echo
+          echo 'Please select Apache server:'
+          echo -e "\t${CMSG}1${CEND}. Install Apache-2.4"
+          echo -e "\t${CMSG}2${CEND}. Install Apache-2.2"
+          echo -e "\t${CMSG}3${CEND}. Do not install"
+          read -p "Please input a number:(Default 3 press Enter) " apache_option
+          [ -z "${apache_option}" ] && apache_option=3
+          if [[ ! ${apache_option} =~ ^[1-3]$ ]]; then
+            echo "${CWARNING}input error! Please only input number 1~3${CEND}"
+          else
+            [ "${apache_option}" != '3' -a -e "${apache_install_dir}/conf/httpd.conf" ] && { echo "${CWARNING}Aapche already installed! ${CEND}"; apache_option=Other; }
+            break
+          fi
+        done
         # Tomcat
-        #while :; do echo
-        #  echo 'Please select tomcat server:'
-        #  echo -e "\t${CMSG}1${CEND}. Install Tomcat-9"
-        #  echo -e "\t${CMSG}2${CEND}. Install Tomcat-8"
-        #  echo -e "\t${CMSG}3${CEND}. Install Tomcat-7"
-        #  echo -e "\t${CMSG}4${CEND}. Install Tomcat-6"
-        #  echo -e "\t${CMSG}5${CEND}. Do not install"
-        #  read -p "Please input a number:(Default 5 press Enter) " tomcat_option
-        #  [ -z "${tomcat_option}" ] && tomcat_option=5
-        #  if [[ ! ${tomcat_option} =~ ^[1-5]$ ]]; then
-        #    echo "${CWARNING}input error! Please only input number 1~5${CEND}"
-        #  else
-        #    [ "${tomcat_option}" != '5' -a -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; tomcat_option=Other; }
-        #    if [ "${tomcat_option}" == '1' ]; then
-        #      while :; do echo
-        #        echo 'Please select JDK version:'
-        #        echo -e "\t${CMSG}1${CEND}. Install JDK-10"
-        #        echo -e "\t${CMSG}2${CEND}. Install JDK-1.8"
-        #        read -p "Please input a number:(Default 1 press Enter) " jdk_option
-        #        [ -z "${jdk_option}" ] && jdk_option=1
-        #        if [[ ! ${jdk_option} =~ ^[1-2]$ ]]; then
-        #          echo "${CWARNING}input error! Please only input number 1~2${CEND}"
-        #        else
-        #          break
-        #        fi
-        #      done
-        #    elif [ "${tomcat_option}" == '2' ]; then
-        #      while :; do echo
-        #        echo 'Please select JDK version:'
-        #        echo -e "\t${CMSG}1${CEND}. Install JDK-10"
-        #        echo -e "\t${CMSG}2${CEND}. Install JDK-1.8"
-        #        echo -e "\t${CMSG}3${CEND}. Install JDK-1.7"
-        #        read -p "Please input a number:(Default 2 press Enter) " jdk_option
-        #        [ -z "${jdk_option}" ] && jdk_option=2
-        #        if [[ ! ${jdk_option} =~ ^[1-3]$ ]]; then
-        #          echo "${CWARNING}input error! Please only input number 1~3${CEND}"
-        #        else
-        #          break
-        #        fi
-        #      done
-        #    elif [ "${tomcat_option}" == '3' ]; then
-        #      while :; do echo
-        #        echo 'Please select JDK version:'
-        #        echo -e "\t${CMSG}2${CEND}. Install JDK-1.8"
-        #        echo -e "\t${CMSG}3${CEND}. Install JDK-1.7"
-        #        echo -e "\t${CMSG}4${CEND}. Install JDK-1.6"
-        #        read -p "Please input a number:(Default 3 press Enter) " jdk_option
-        #        [ -z "${jdk_option}" ] && jdk_option=3
-        #        if [[ ! ${jdk_option} =~ ^[2-4]$ ]]; then
-        #          echo "${CWARNING}input error! Please only input number 2~4${CEND}"
-        #        else
-        #          break
-        #        fi
-        #      done
-        #    elif [ "${tomcat_option}" == '4' ]; then
-        #      while :; do echo
-        #        echo 'Please select JDK version:'
-        #        echo -e "\t${CMSG}3${CEND}. Install JDK-1.7"
-        #        echo -e "\t${CMSG}4${CEND}. Install JDK-1.6"
-        #        read -p "Please input a number:(Default 4 press Enter) " jdk_option
-        #        [ -z "${jdk_option}" ] && jdk_option=4
-        #        if [[ ! ${jdk_option} =~ ^[3-4]$ ]]; then
-        #          echo "${CWARNING}input error! Please only input number 3~4${CEND}"
-        #        else
-        #          break
-        #        fi
-        #      done
-        #    fi
-        #    break
-        #  fi
-        #done
+        while :; do echo
+          echo 'Please select tomcat server:'
+          echo -e "\t${CMSG}1${CEND}. Install Tomcat-9"
+          echo -e "\t${CMSG}2${CEND}. Install Tomcat-8"
+          echo -e "\t${CMSG}3${CEND}. Install Tomcat-7"
+          echo -e "\t${CMSG}4${CEND}. Install Tomcat-6"
+          echo -e "\t${CMSG}5${CEND}. Do not install"
+          read -p "Please input a number:(Default 5 press Enter) " tomcat_option
+          [ -z "${tomcat_option}" ] && tomcat_option=5
+          if [[ ! ${tomcat_option} =~ ^[1-5]$ ]]; then
+            echo "${CWARNING}input error! Please only input number 1~5${CEND}"
+          else
+            [ "${tomcat_option}" != '5' -a -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; tomcat_option=Other; }
+            if [ "${tomcat_option}" == '1' ]; then
+              while :; do echo
+                echo 'Please select JDK version:'
+                echo -e "\t${CMSG}1${CEND}. Install JDK-10"
+                echo -e "\t${CMSG}2${CEND}. Install JDK-1.8"
+                read -p "Please input a number:(Default 1 press Enter) " jdk_option
+                [ -z "${jdk_option}" ] && jdk_option=1
+                if [[ ! ${jdk_option} =~ ^[1-2]$ ]]; then
+                  echo "${CWARNING}input error! Please only input number 1~2${CEND}"
+                else
+                  break
+                fi
+              done
+            elif [ "${tomcat_option}" == '2' ]; then
+              while :; do echo
+                echo 'Please select JDK version:'
+                echo -e "\t${CMSG}1${CEND}. Install JDK-10"
+                echo -e "\t${CMSG}2${CEND}. Install JDK-1.8"
+                echo -e "\t${CMSG}3${CEND}. Install JDK-1.7"
+                read -p "Please input a number:(Default 2 press Enter) " jdk_option
+                [ -z "${jdk_option}" ] && jdk_option=2
+                if [[ ! ${jdk_option} =~ ^[1-3]$ ]]; then
+                  echo "${CWARNING}input error! Please only input number 1~3${CEND}"
+                else
+                  break
+                fi
+              done
+            elif [ "${tomcat_option}" == '3' ]; then
+              while :; do echo
+                echo 'Please select JDK version:'
+                echo -e "\t${CMSG}2${CEND}. Install JDK-1.8"
+                echo -e "\t${CMSG}3${CEND}. Install JDK-1.7"
+                echo -e "\t${CMSG}4${CEND}. Install JDK-1.6"
+                read -p "Please input a number:(Default 3 press Enter) " jdk_option
+                [ -z "${jdk_option}" ] && jdk_option=3
+                if [[ ! ${jdk_option} =~ ^[2-4]$ ]]; then
+                  echo "${CWARNING}input error! Please only input number 2~4${CEND}"
+                else
+                  break
+                fi
+              done
+            elif [ "${tomcat_option}" == '4' ]; then
+              while :; do echo
+                echo 'Please select JDK version:'
+                echo -e "\t${CMSG}3${CEND}. Install JDK-1.7"
+                echo -e "\t${CMSG}4${CEND}. Install JDK-1.6"
+                read -p "Please input a number:(Default 4 press Enter) " jdk_option
+                [ -z "${jdk_option}" ] && jdk_option=4
+                if [[ ! ${jdk_option} =~ ^[3-4]$ ]]; then
+                  echo "${CWARNING}input error! Please only input number 3~4${CEND}"
+                else
+                  break
+                fi
+              done
+            fi
+            break
+          fi
+        done
       fi
       break
     fi
@@ -362,11 +360,11 @@ if [ ${ARG_NUM} == 0 ]; then
           [[ "${db_option}" =~ ^5$|^15$ ]] && [ "${OS_BIT}" == '32' ] && { echo "${CWARNING}By not supporting 32-bit! ${CEND}"; continue; }
           if [[ "${db_option}" =~ ^[1-9]$|^1[0-5]$ ]]; then
             if [ "${db_option}" == '14' ]; then
-              [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; db_yn=Other; break; }
+              [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; db_option=Other; break; }
             elif [ "${db_option}" == '15' ]; then
-              [ -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}MongoDB already installed! ${CEND}"; db_yn=Other; break; }
+              [ -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}MongoDB already installed! ${CEND}"; db_option=Other; break; }
             else
-              [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; db_yn=Other; break; }
+              [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; db_option=Other; break; }
             fi
             while :; do
               if [ "${db_option}" == '14' ]; then
@@ -426,7 +424,7 @@ if [ ${ARG_NUM} == 0 ]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
       if [ "${php_yn}" == 'y' ]; then
-        [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; php_yn=Other; break; }
+        [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; php_option=Other; break; }
         while :; do echo
           echo 'Please select a version of the PHP:'
           echo -e "\t${CMSG}1${CEND}. Install php-5.3"
@@ -640,7 +638,7 @@ if [ ${ARG_NUM} == 0 ]; then
     else
       if [ "${hhvm_yn}" == 'y' ]; then
         [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; hhvm_yn=Other; break; }
-        if [ "${OS}" == 'CentOS' -a "${OS_BIT}" == '64' ] && [ -n "`grep -E ' 7\.| 6\.[5-9]' /etc/redhat-release`" ]; then
+        if [ "${PM}" == 'yum' -a "${OS_BIT}" == '64' ] && [ -n "`grep -E ' 7\.| 6\.[5-9]' /etc/redhat-release`" ]; then
           break
         else
           echo
@@ -656,16 +654,15 @@ if [ ${ARG_NUM} == 0 ]; then
 fi
 
 # get the IP information
-IPADDR=`./include/get_ipaddr.py`
-PUBLIC_IPADDR=`./include/get_public_ipaddr.py`
-IPADDR_COUNTRY_ISP=`./include/get_ipaddr_state.py $PUBLIC_IPADDR`
-IPADDR_COUNTRY=`echo $IPADDR_COUNTRY_ISP | awk '{print $1}'`
+IPADDR=$(./include/get_ipaddr.py)
+PUBLIC_IPADDR=$(./include/get_public_ipaddr.py)
+IPADDR_COUNTRY=$(./include/get_ipaddr_state.py $PUBLIC_IPADDR)
 
 # Check download source packages
 . ./include/check_download.sh
 downloadDepsSrc=1
-[ "${OS}" == 'CentOS' ] && yum -y -q install wget
-[[ "${OS}" =~ ^Ubuntu$|^Debian$ ]] &&  apt -y -q install wget
+[ "${PM}" == 'yum' ] && yum -y -q install wget
+[ "${PM}" == 'apt' ] && apt-get -y -q install wget
 checkDownload 2>&1 | tee -a ${oneinstack_dir}/install.log
 
 # del openssl for jcloud
@@ -969,7 +966,7 @@ fi
 . include/check_dir.sh
 
 # HHVM
-if [ "${hhvm_yn}" == 'y' ] && [ "${OS}" == 'CentOS' -a "${OS_BIT}" == '64' ] && [ -n "`grep -E ' 7\.| 6\.[5-9]' /etc/redhat-release`" ]; then
+if [ "${hhvm_yn}" == 'y' ] && [ "${PM}" == 'yum' -a "${OS_BIT}" == '64' ] && [ -n "`grep -E ' 7\.| 6\.[5-9]' /etc/redhat-release`" ]; then
   . include/hhvm_CentOS.sh
   Install_hhvm_CentOS 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi

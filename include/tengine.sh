@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -16,6 +16,8 @@ Install_Tengine() {
   tar xzf pcre-${pcre_ver}.tar.gz
   tar xzf tengine-${tengine_ver}.tar.gz
   tar xzf openssl-${openssl_ver}.tar.gz
+  [ "${Fedora_ver}" == '28' ] && patch -d tengine-${tengine_ver} -p1 < 0001-unix-ngx_user-Apply-fix-for-really-old-bug-in-glibc-.patch
+  patch -d tengine-${tengine_ver} -p0 < nginx-auto-cc-gcc.patch
   pushd tengine-${tengine_ver}
   # Modify Tengine version
   #sed -i 's@TENGINE "/" TENGINE_VERSION@"Tengine/unknown"@' src/core/nginx.h
@@ -47,8 +49,8 @@ Install_Tengine() {
     sed -i "s@/usr/local/nginx@${tengine_install_dir}@g" /lib/systemd/system/nginx.service
     systemctl enable nginx
   else
-    [ "${OS}" == 'CentOS' ] && { /bin/cp ../init.d/Nginx-init-CentOS /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${tengine_install_dir}@g" /etc/init.d/nginx; chkconfig --add nginx; chkconfig nginx on; }
-    [[ ${OS} =~ ^Ubuntu$|^Debian$ ]] && { /bin/cp ../init.d/Nginx-init-Ubuntu /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${tengine_install_dir}@g" /etc/init.d/nginx; update-rc.d nginx defaults; }
+    [ "${PM}" == 'yum' ] && { /bin/cp ../init.d/Nginx-init-CentOS /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${tengine_install_dir}@g" /etc/init.d/nginx; chkconfig --add nginx; chkconfig nginx on; }
+    [ "${PM}" == 'apt' ] && { /bin/cp ../init.d/Nginx-init-Ubuntu /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${tengine_install_dir}@g" /etc/init.d/nginx; update-rc.d nginx defaults; }
   fi
 
   mv ${tengine_install_dir}/conf/nginx.conf{,_bk}

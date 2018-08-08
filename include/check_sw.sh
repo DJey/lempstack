@@ -1,7 +1,7 @@
 #!/bin/bash
 # Author:  Alpha Eva <kaneawk AT gmail.com>
 #
-# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -68,7 +68,7 @@ installDepsCentOS() {
   echo "${CMSG}Installing dependencies packages...${CEND}"
   yum check-update
   # Install needed packages
-  pkgList="deltarpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-devel libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel freetype freetype-devel libxml2 libxml2-devel zlib zlib-devel glibc glibc-devel krb5-devel libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel libxslt-devel libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre-devel zip unzip ntpdate sqlite-devel sysstat patch bc expect expat-devel rsync rsyslog git lsof lrzsz psmisc wget"
+  pkgList="deltarpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-devel libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel freetype freetype-devel libxml2 libxml2-devel zlib zlib-devel glibc glibc-devel krb5-devel libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel libxslt-devel libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre-devel zip unzip ntpdate sqlite-devel sysstat patch bc expect expat-devel rsync rsyslog git lsof lrzsz psmisc wget libatomic"
   for Package in ${pkgList}; do
     yum -y install ${Package}
   done
@@ -120,7 +120,7 @@ installDepsUbuntu() {
 
 installDepsBySrc() {
   pushd ${oneinstack_dir}/src > /dev/null
-  if [ "${OS}" == "Ubuntu" ]; then
+  if [ "${OS}" == 'Ubuntu' ]; then
     if [[ "${Ubuntu_ver}" =~ ^14$|^15$ ]]; then
       # Install bison on ubt 14.x 15.x
       tar xzf bison-${bison_ver}.tar.gz
@@ -130,7 +130,7 @@ installDepsBySrc() {
       popd
       rm -rf bison-${bison_ver}
     fi
-  elif [ "${OS}" == "CentOS" ]; then
+  elif [ "${OS}" == 'CentOS' ]; then
     # Install tmux
     if [ ! -e "$(which tmux)" ]; then
       # Install libevent first

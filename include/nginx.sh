@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -16,6 +16,8 @@ Install_Nginx() {
   tar xzf pcre-${pcre_ver}.tar.gz
   tar xzf nginx-${nginx_ver}.tar.gz
   tar xzf openssl-${openssl_ver}.tar.gz
+  [ "${Fedora_ver}" == '28' ] && patch -d nginx-${nginx_ver} -p1 < 0001-unix-ngx_user-Apply-fix-for-really-old-bug-in-glibc-.patch
+  patch -d nginx-${nginx_ver} -p0 < nginx-auto-cc-gcc.patch
   pushd nginx-${nginx_ver}
   # Modify Nginx version
   #sed -i 's@#define NGINX_VERSION.*$@#define NGINX_VERSION      "1.2"@' src/core/nginx.h
@@ -49,8 +51,8 @@ Install_Nginx() {
     sed -i "s@/usr/local/nginx@${nginx_install_dir}@g" /lib/systemd/system/nginx.service
     systemctl enable nginx
   else
-    [ "${OS}" == 'CentOS' ] && { /bin/cp ../init.d/Nginx-init-CentOS /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${nginx_install_dir}@g" /etc/init.d/nginx; chkconfig --add nginx; chkconfig nginx on; }
-    [[ ${OS} =~ ^Ubuntu$|^Debian$ ]] && { /bin/cp ../init.d/Nginx-init-Ubuntu /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${nginx_install_dir}@g" /etc/init.d/nginx; update-rc.d nginx defaults; }
+    [ "${PM}" == 'yum' ] && { /bin/cp ../init.d/Nginx-init-CentOS /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${nginx_install_dir}@g" /etc/init.d/nginx; chkconfig --add nginx; chkconfig nginx on; }
+    [ "${PM}" == 'apt' ] && { /bin/cp ../init.d/Nginx-init-Ubuntu /etc/init.d/nginx; sed -i "s@/usr/local/nginx@${nginx_install_dir}@g" /etc/init.d/nginx; update-rc.d nginx defaults; }
   fi
 
   mv ${nginx_install_dir}/conf/nginx.conf{,_bk}
