@@ -137,12 +137,12 @@
 	            <h1 class="h2" id="home">控制中心</h1>
 	            <div class="btn-toolbar mb-2 mb-md-0">
 	              <div class="btn-group mr-2">
-	                <a class="btn btn-sm btn-outline-primary btn_prober" href="prober.php"><span data-feather="compass"></span> prober</a>
-	                <a class="btn btn-sm btn-outline-primary btn_tz" href="tz.php"><span data-feather="compass"></span> 探针</a>
-	                <a class="btn btn-sm btn-outline-info btn_phpinfo" href="phpinfo.php"><span data-feather="info"></span> phpinfo</a>
-	                <a class="btn btn-sm btn-outline-secondary btn_op" href="ocp.php"><span data-feather="cpu"></span> Opcache</a>
+	                <a class="btn btn-sm btn-outline-primary btn_prober" href="prober.php" target="_blank"><span data-feather="compass"></span> prober</a>
+	                <a class="btn btn-sm btn-outline-primary btn_tz" href="tz.php" target="_blank"><span data-feather="compass"></span> 探针</a>
+	                <a class="btn btn-sm btn-outline-info btn_phpinfo" href="phpinfo.php" target="_blank"><span data-feather="info"></span> phpinfo</a>
+	                <a class="btn btn-sm btn-outline-secondary btn_op" href="ocp.php" target="_blank"><span data-feather="cpu"></span> Opcache</a>
 	              </div>
-	              <a class="btn btn-sm btn-outline-warning mr-2 btn_pma" href="phpMyAdmin/">
+	              <a class="btn btn-sm btn-outline-warning mr-2 btn_pma" href="phpMyAdmin/" target="_blank">
 	                <span data-feather="database"></span> phpMyAdmin
 	              </a>
 	            </div>
@@ -188,7 +188,7 @@
 			            <h1 class="card-title pricing-card-title">建立<small class="text-muted">网站</small></h1>
 			            <ul class="list-unstyled mt-3 mb-4">
 			              <li>新建虚拟主机 ./vhost.sh</li>
-			              <li>删除虚拟主机 ./vhost.sh del</li>
+			              <li>删除虚拟主机 ./vhost.sh --del</li>
 			              <li>管理FTP账号 ./pureftpd_vhost.sh</li>
 			            </ul>
 			            <a href="https://oneinstack.com/install/" target="_blank" type="button" class="btn btn-lg btn-block btn-primary">详细教程</a>
@@ -201,7 +201,7 @@
 			          <div class="card-body">
 			            <h1 class="card-title pricing-card-title">上线<small class="text-muted">运行</small></h1>
 			            <ul class="list-unstyled mt-3 mb-4">
-			              <li><a href="phpMyAdmin/">phpMyAdmin</a></li>
+			              <li><a href="phpMyAdmin/" target="_blank">phpMyAdmin</a></li>
 			              <li>管理FTP账号 ./pureftpd_vhost.sh</li>
 			              <li>备份 ./backup_setup.sh</li>
 			            </ul>
@@ -219,7 +219,7 @@
 	          <img class="img-fluid" src="https://static.oneinstack.com/images/vhost.png" alt="《交互安装》">
 	          <h2 class="mt-5">如何删除虚拟主机?</h2>
 	          <div class="alert alert-primary" role="alert">
-	          	<code>./vhost.sh del</code>
+	          	<code>./vhost.sh --del</code>
 	          </div>
 	          <img class="img-fluid" src="https://static.oneinstack.com/images/vhost_del.png" alt="《交互安装》">
 			</section>
@@ -249,7 +249,7 @@
 	          <img class="img-fluid" src="https://static.oneinstack.com/images/backup_setup.png" alt="《交互安装》">
 	          <div class="alert alert-primary" role="alert"><pre><code>./backup.sh # Start backup, You can add cron jobs
    # crontab -l # Examples
-     0 1 * * * cd ~/oneinstack;./backup.sh  &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre></div>
+     0 1 * * * ~/oneinstack/backup.sh  &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre></div>
 			</section>
 
 			<section class="section" id="manage_section">	
@@ -267,7 +267,7 @@
 				<div class="alert alert-primary" role="alert"><code>service php-fpm {start<span class="pl-k">|</span>stop<span class="pl-k">|</span>restart<span class="pl-k">|</span>reload<span class="pl-k">|</span>status}</code></div>
 				<p class="mt-4">HHVM:</p>
 				<div class="alert alert-primary" role="alert"><code>service supervisord {start|stop|status|restart|reload}</code></div>
-				<p class="mt-4"><strong><span style="color: #ff0000;">注</span></strong>：hhvm进程交给supervisord管理，了解更多请访问《<a href="https://blog.linuxeye.com/408.html" target="_blank" rel="noopener noreferrer">Supervisor管理hhvm进程</a>》<br>
+				<p class="mt-4"><strong><span style="color: #ff0000;">注</span></strong>：hhvm进程交给supervisord管理，了解更多请访问《<a href="https://blog.linuxeye.cn/408.html" target="_blank" rel="noopener noreferrer">Supervisor管理hhvm进程</a>》<br>
 				<p class="mt-4">Apache:</p>
 				<div class="alert alert-primary" role="alert"><code>service httpd {start|restart|stop}</code></div>
 				<p class="mt-4">Tomcat:</p>

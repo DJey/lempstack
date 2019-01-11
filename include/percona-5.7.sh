@@ -2,11 +2,11 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
-#       https://github.com/lj2007331/oneinstack
+#       https://github.com/oneinstack/oneinstack
 
 Install_Percona57() {
   pushd ${oneinstack_dir}/src > /dev/null
@@ -69,7 +69,7 @@ Install_Percona57() {
   sed -i "s@^datadir=.*@datadir=${percona_data_dir}@" /etc/init.d/mysqld
   chmod +x /etc/init.d/mysqld
   [ "${PM}" == 'yum' ] && { chkconfig --add mysqld; chkconfig mysqld on; }
-  [ "${PM}" == 'apt' ] && update-rc.d mysqld defaults
+  [ "${PM}" == 'apt-get' ] && update-rc.d mysqld defaults
   popd
 
   # my.cnf
@@ -216,7 +216,7 @@ EOF
   ${percona_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "reset master;"
   rm -rf /etc/ld.so.conf.d/{mysql,mariadb,percona,alisql}*.conf
   [ -e "${percona_install_dir}/my.cnf" ] && rm -rf ${percona_install_dir}/my.cnf
-  echo "${percona_install_dir}/lib" > /etc/ld.so.conf.d/mysql.conf
+  echo "${percona_install_dir}/lib" > /etc/ld.so.conf.d/z-percona.conf
   ldconfig
   service mysqld stop
 }

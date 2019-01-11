@@ -2,11 +2,11 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
-#       https://github.com/lj2007331/oneinstack
+#       https://github.com/oneinstack/oneinstack
 
 DEMO() {
   pushd ${oneinstack_dir}/src > /dev/null
@@ -43,6 +43,6 @@ DEMO() {
     esac
   fi
   chown -R ${run_user}.${run_user} ${wwwroot_dir}/default
-  [ -e /usr/bin/systemctl ] && systemctl daemon-reload
-  popd
+  [ -e /bin/systemctl ] && systemctl daemon-reload
+  popd > /dev/null
 }

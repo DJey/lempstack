@@ -2,11 +2,11 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
-#       https://github.com/lj2007331/oneinstack
+#       https://github.com/oneinstack/oneinstack
 
 Nginx_lua_waf() {
   pushd ${oneinstack_dir}/src > /dev/null
@@ -32,18 +32,20 @@ Nginx_lua_waf() {
   ${nginx_install_dir}/sbin/nginx -V &> $$
   nginx_configure_args_tmp=`cat $$ | grep 'configure arguments:' | awk -F: '{print $2}'`
   rm -rf $$
-  nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@--with-openssl=../openssl-...... @--with-openssl=../openssl-${openssl_ver} @" | sed "s@--with-pcre=../pcre-.... @--with-pcre=../pcre-${pcre_ver} @"`
+  nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@--with-openssl=../openssl-\w.\w.\w\+ @--with-openssl=../openssl-${openssl11_ver} @" | sed "s@--with-pcre=../pcre-\w.\w\+ @--with-pcre=../pcre-${pcre_ver} @"`
   if [ -z "`echo ${nginx_configure_args} | grep lua-nginx-module`" ]; then
     src_url=http://nginx.org/download/nginx-${nginx_ver}.tar.gz && Download_src
-    src_url=https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz && Download_src
+    src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
     src_url=http://mirrors.linuxeye.com/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
     src_url=http://mirrors.linuxeye.com/oneinstack/src/ngx_devel_kit.tar.gz && Download_src
     src_url=http://mirrors.linuxeye.com/oneinstack/src/lua-nginx-module.tar.gz && Download_src
     tar xzf nginx-${nginx_ver}.tar.gz
-    tar xzf openssl-${openssl_ver}.tar.gz
+    tar xzf openssl-${openssl11_ver}.tar.gz
     tar xzf pcre-${pcre_ver}.tar.gz
     tar xzf ngx_devel_kit.tar.gz
     tar xzf lua-nginx-module.tar.gz
+    [ "${Fedora_ver}" == '28' ] && patch -d nginx-${nginx_ver} -p1 < 0001-unix-ngx_user-Apply-fix-for-really-old-bug-in-glibc-.patch
+    patch -d nginx-${nginx_ver} -p0 < nginx-auto-cc-gcc.patch
     pushd nginx-${nginx_ver}
     make clean
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc # close debug
@@ -93,7 +95,7 @@ Tengine_lua_waf() {
   ${tengine_install_dir}/sbin/nginx -V &> $$
   tengine_configure_args_tmp=`cat $$ | grep 'configure arguments:' | awk -F: '{print $2}'`
   rm -rf $$
-  tengine_configure_args=`echo ${tengine_configure_args_tmp} | sed "s@--with-openssl=../openssl-...... @--with-openssl=../openssl-${openssl_ver} @" | sed "s@--with-pcre=../pcre-.... @--with-pcre=../pcre-${pcre_ver} @"`
+  tengine_configure_args=`echo ${tengine_configure_args_tmp} | sed "s@--with-openssl=../openssl-\w.\w.\w\+ @--with-openssl=../openssl-${openssl_ver} @" | sed "s@--with-pcre=../pcre-\w.\w\+ @--with-pcre=../pcre-${pcre_ver} @"`
   if [ -z "`echo ${tengine_configure_args} | grep lua`" ]; then
     src_url=http://tengine.taobao.org/download/tengine-${tengine_ver}.tar.gz && Download_src
     src_url=https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz && Download_src
@@ -105,6 +107,8 @@ Tengine_lua_waf() {
     tar xzf pcre-${pcre_ver}.tar.gz
     tar xzf ngx_devel_kit.tar.gz
     tar xzf lua-nginx-module.tar.gz
+    [ "${Fedora_ver}" == '28' ] && patch -d tengine-${tengine_ver} -p1 < 0001-unix-ngx_user-Apply-fix-for-really-old-bug-in-glibc-.patch
+    patch -d tengine-${tengine_ver} -p0 < nginx-auto-cc-gcc.patch
     pushd tengine-${tengine_ver}
     make clean
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc # close debug

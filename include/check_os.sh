@@ -2,17 +2,18 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
-#       https://github.com/lj2007331/oneinstack
+#       https://github.com/oneinstack/oneinstack
 
 if [ -e "/usr/bin/yum" ]; then
   PM=yum
   command -v lsb_release >/dev/null 2>&1 || { yum -y install redhat-lsb-core; clear; }
-elif [ -e "/usr/bin/apt-get" ]; then
-  PM=apt
+fi
+if [ -e "/usr/bin/apt-get" ]; then
+  PM=apt-get
   command -v lsb_release >/dev/null 2>&1 || { apt-get -y update; apt-get -y install lsb-release; clear; }
 fi
 
@@ -23,7 +24,7 @@ if [ -e /etc/redhat-release ]; then
   CentOS_ver=$(lsb_release -sr | awk -F. '{print $1}')
   [ "${CentOS_ver}" == '17' ] && CentOS_ver=7
   [ "$(lsb_release -is)" == 'Fedora' ] && [ ${CentOS_ver} -ge 19 >/dev/null 2>&1 ] && { CentOS_ver=7; Fedora_ver=$(lsb_release -rs); }
-elif [ -n "$(grep 'Amazon Linux' /etc/issue)" ]; then
+elif [ -n "$(grep 'Amazon Linux' /etc/issue)" -o -n "$(grep 'Amazon Linux' /etc/os-release)" ]; then
   OS=CentOS
   CentOS_ver=7
 elif [ -n "$(grep 'bian' /etc/issue)" -o "$(lsb_release -is 2>/dev/null)" == "Debian" ]; then

@@ -2,11 +2,11 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
-#       https://github.com/lj2007331/oneinstack
+#       https://github.com/oneinstack/oneinstack
 
 Upgrade_DB() {
   pushd ${oneinstack_dir}/src > /dev/null
@@ -34,7 +34,7 @@ Upgrade_DB() {
       break
     else
       echo
-      read -p "Please input the root password of database: " NEW_dbrootpwd
+      read -e -p "Please input the root password of database: " NEW_dbrootpwd
       ${db_install_dir}/bin/mysql -uroot -p${NEW_dbrootpwd} -e "quit" >/dev/null 2>&1
       if [ $? -eq 0 ]; then
         dbrootpwd=${NEW_dbrootpwd}
@@ -55,7 +55,7 @@ Upgrade_DB() {
   echo
   echo "Current ${DB} Version: ${CMSG}${OLD_db_ver}${CEND}"
   while :; do echo
-    read -p "Please input upgrade ${DB} Version(example: ${OLD_db_ver}): " NEW_db_ver
+    [ "${db_flag}" != 'y' ] && read -e -p "Please input upgrade ${DB} Version(example: ${OLD_db_ver}): " NEW_db_ver
     if [ `echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'` == `echo ${OLD_db_ver} | awk -F. '{print $1"."$2}'` ]; then
       if [ "${DB}" == 'MariaDB' ]; then
         DB_name=mariadb-${NEW_db_ver}-${GLIBC_FLAG}-${SYS_BIT_b}
@@ -85,8 +85,10 @@ Upgrade_DB() {
 
   if [ -e "`ls ${DB_name}.tar.?z 2>/dev/null`" ]; then
     echo "[${CMSG}`ls ${DB_name}.tar.?z 2>/dev/null`${CEND}] found"
-    echo "Press Ctrl+c to cancel or Press any key to continue..."
-    char=`get_char`
+    if [ "${db_flag}" != 'y' ]; then
+      echo "Press Ctrl+c to cancel or Press any key to continue..."
+      char=`get_char`
+    fi
     if [ "${DB}" == 'MariaDB' ]; then
       service mysqld stop
       mv ${mariadb_install_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
