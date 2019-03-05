@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.cn
+# BLOG:  https://linuxeye.com
 #
 # Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -38,7 +38,8 @@ elif [ $Mem -gt 8000 ]; then
 fi
 
 # add swapfile
-if [ "${Swap}" == '0' ] && [ ${Mem} -le 2048 ]; then
+if [ ! -e ~/.oneinstack ] && [ "${Swap}" == '0' ] && [ ${Mem} -le 2048 ]; then
+  echo "${CWARNING}Add Swap file, It may take a few minutes... ${CEND}"
   dd if=/dev/zero of=/swapfile count=2048 bs=1M
   mkswap /swapfile
   swapon /swapfile

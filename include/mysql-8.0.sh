@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.cn
+# BLOG:  https://linuxeye.com
 #
 # Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -38,6 +38,7 @@ Install_MySQL80() {
     -DWITH_EMBEDDED_SERVER=1 \
     -DENABLE_DTRACE=0 \
     -DENABLED_LOCAL_INFILE=1 \
+    -DFORCE_INSOURCE_BUILD=1 \
     -DDEFAULT_CHARSET=utf8mb4 \
     -DEXTRA_CHARSETS=all
     make -j ${THREAD}

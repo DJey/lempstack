@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.cn
+# BLOG:  https://linuxeye.com
 #
 # Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -35,7 +35,6 @@ Install_Tomcat9() {
     kill -9 $$
   fi
 
-  /bin/cp catalina-jmx-remote.jar ${tomcat_install_dir}/lib
   #[ ! -d "${tomcat_install_dir}/lib/catalina" ] && mkdir ${tomcat_install_dir}/lib/catalina
   #pushd ${tomcat_install_dir}/lib/catalina
   #jar xf ../catalina.jar

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.cn
+# BLOG:  https://linuxeye.com
 #
 # Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -11,7 +11,7 @@
 Upgrade_PHP() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${php_install_dir}" ] && echo "${CWARNING}PHP is not installed on your system! ${CEND}" && exit 1
-  OLD_php_ver=`${php_install_dir}/bin/php -r 'echo PHP_VERSION;'`
+  OLD_php_ver=`${php_install_dir}/bin/php-config --version`
   Latest_php_ver=`curl --connect-timeout 2 -m 3 -s http://php.net/downloads.php | awk '/Changelog/{print $2}' | grep "${OLD_php_ver%.*}"`
   Latest_php_ver=${Latest_php_ver:-5.5.38}
   echo
@@ -20,7 +20,7 @@ Upgrade_PHP() {
     [ "${php_flag}" != 'y' ] && read -e -p "Please input upgrade PHP Version(Default: $Latest_php_ver): " NEW_php_ver
     NEW_php_ver=${NEW_php_ver:-${Latest_php_ver}}
     if [ "${NEW_php_ver%.*}" == "${OLD_php_ver%.*}" ]; then
-      [ ! -e "php-${NEW_php_ver}.tar.gz" ] && wget --no-check-certificate -c http://www.php.net/distributions/php-${NEW_php_ver}.tar.gz > /dev/null 2>&1
+      [ ! -e "php-${NEW_php_ver}.tar.gz" ] && wget --no-check-certificate -c https://secure.php.net/distributions/php-${NEW_php_ver}.tar.gz > /dev/null 2>&1
       if [ -e "php-${NEW_php_ver}.tar.gz" ]; then
         echo "Download [${CMSG}php-${NEW_php_ver}.tar.gz${CEND}] successfully! "
       else
@@ -45,7 +45,7 @@ Upgrade_PHP() {
     make clean
     ${php_install_dir}/bin/php -i |grep 'Configure Command' | awk -F'=>' '{print $2}' | bash
     make ZEND_EXTRA_LIBS='-liconv'
-    if [ -e "${apache_install_dir}/bin/apachectl" ]; then
+    if [ -e "${apache_install_dir}/bin/httpd" ]; then
       echo "Stoping apache..."
       service httpd stop
       make install

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.cn
+# BLOG:  https://linuxeye.com
 #
 # Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -18,8 +18,8 @@ Install_pecl_imap() {
       apt-get -y install libc-client2007e-dev
     fi
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
-    PHP_detail_ver=$(${php_install_dir}/bin/php -r 'echo PHP_VERSION;')
-    src_url=http://www.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
+    PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
+    src_url=https://secure.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
     tar xzf php-${PHP_detail_ver}.tar.gz
     pushd php-${PHP_detail_ver}/ext/imap > /dev/null
     ${php_install_dir}/bin/phpize

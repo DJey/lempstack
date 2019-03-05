@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.cn
+# BLOG:  https://linuxeye.com
 #
 # Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -11,10 +11,10 @@
 Install_ZendGuardLoader() {
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     pushd ${oneinstack_dir}/src > /dev/null
-    PHP_detail_ver=$(${php_install_dir}/bin/php -r 'echo PHP_VERSION;')
+    PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
     phpExtensionDir=`${php_install_dir}/bin/php-config --extension-dir`
-    [ -e "${php_install_dir}/bin/phpize" ] && [ ! -d "${phpExtensionDir}" ] && mkdir -p ${phpExtensionDir}
+    [ ! -d "${phpExtensionDir}" ] && mkdir -p ${phpExtensionDir}
     if [ -n "`echo $phpExtensionDir | grep 'non-zts'`" ] && [ "${armplatform}" != 'y' ]; then
       case "${PHP_main_ver}" in
         5.6)
@@ -43,6 +43,7 @@ Install_ZendGuardLoader() {
       esac
 
       if [ -f "${phpExtensionDir}/ZendGuardLoader.so" ]; then
+        chmod 644 ${phpExtensionDir}/ZendGuardLoader.so
         cat > ${php_install_dir}/etc/php.d/01-ZendGuardLoader.ini<< EOF
 [Zend Guard Loader]
 zend_extension=${phpExtensionDir}/ZendGuardLoader.so

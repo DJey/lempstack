@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.cn
+# BLOG:  https://linuxeye.com
 #
 # Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -37,21 +37,24 @@ Show_Help() {
   --mysql                       Uninstall MySQL/MariaDB/Percona/AliSQL
   --postgresql                  Uninstall PostgreSQL
   --mongodb                     Uninstall MongoDB
-  --php                         Uninstall PHP
+  --php                         Uninstall PHP (PATH: ${php_install_dir})
+  --mphp_ver [53~73]            Uninstall another PHP version (PATH: ${php_install_dir}\${mphp_ver})
+  --allphp                      Uninstall all PHP
   --phpcache                    Uninstall PHP opcode cache
   --php_extensions [ext name]   Uninstall PHP extensions, include zendguardloader,ioncube,
-                                sourceguardian,imagick,gmagick,fileinfo,imap,phalcon,
-                                redis,memcached,memcache,mongodb,swoole,xdebug
+                                sourceguardian,imagick,gmagick,fileinfo,imap,ldap,phalcon,
+                                yaf,redis,memcached,memcache,mongodb,swoole,xdebug
   --hhvm                        Uninstall HHVM
   --pureftpd                    Uninstall PureFtpd
   --redis                       Uninstall Redis-server
   --memcached                   Uninstall Memcached-server
   --phpmyadmin                  Uninstall phpMyAdmin
+  --python                      Uninstall Python (PATH: ${python_install_dir})
   "
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,phpcache,php_extensions:,hhvm,pureftpd,redis,memcached,phpmyadmin -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,mphp_ver:,allphp,phpcache,php_extensions:,hhvm,pureftpd,redis,memcached,phpmyadmin,python -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -71,12 +74,13 @@ while :; do
       mysql_flag=y
       postgresql_flag=y
       mongodb_flag=y
-      php_flag=y
+      allphp_flag=y
       hhvm_flag=y
       pureftpd_flag=y
       redis_flag=y
       memcached_flag=y
       phpmyadmin_flag=y
+      python_flag=y
       shift 1
       ;;
     --web)
@@ -94,6 +98,13 @@ while :; do
     --php)
       php_flag=y; shift 1
       ;;
+    --mphp_ver)
+      mphp_ver=$2; mphp_flag=y; shift 2
+      [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-3]$ ]] && { echo "${CWARNING}mphp_ver input error! Please only input number 53~73${CEND}"; exit 1; }
+      ;;
+    --allphp)
+      allphp_flag=y; shift 1
+      ;;
     --phpcache)
       phpcache_flag=y; shift 1
       ;;
@@ -106,7 +117,9 @@ while :; do
       [ -n "`echo ${php_extensions} | grep -w gmagick`" ] && pecl_gmagick=1
       [ -n "`echo ${php_extensions} | grep -w fileinfo`" ] && pecl_fileinfo=1
       [ -n "`echo ${php_extensions} | grep -w imap`" ] && pecl_imap=1
+      [ -n "`echo ${php_extensions} | grep -w ldap`" ] && pecl_ldap=1
       [ -n "`echo ${php_extensions} | grep -w phalcon`" ] && pecl_phalcon=1
+      [ -n "`echo ${php_extensions} | grep -w yaf`" ] && pecl_yaf=1
       [ -n "`echo ${php_extensions} | grep -w redis`" ] && pecl_redis=1
       [ -n "`echo ${php_extensions} | grep -w memcached`" ] && pecl_memcached=1
       [ -n "`echo ${php_extensions} | grep -w memcache`" ] && pecl_memcache=1
@@ -128,6 +141,9 @@ while :; do
       ;;
     --phpmyadmin)
       phpmyadmin_flag=y; shift 1
+      ;;
+    --python)
+      python_flag=y; shift 1
       ;;
     --)
       shift
@@ -157,23 +173,23 @@ Print_Warn() {
 }
 
 Print_web() {
-  [ -d "${nginx_install_dir}" ] && echo "${nginx_install_dir}"
-  [ -d "${tengine_install_dir}" ] && echo "${tengine_install_dir}"
-  [ -d "${openresty_install_dir}" ] && echo "${openresty_install_dir}"
-  [ -e "/etc/init.d/nginx" ] && echo '/etc/init.d/nginx'
-  [ -e "/lib/systemd/system/nginx.service" ] && echo '/lib/systemd/system/nginx.service'
-  [ -e "/etc/logrotate.d/nginx" ] && echo '/etc/logrotate.d/nginx'
+  [ -d "${nginx_install_dir}" ] && echo ${nginx_install_dir}
+  [ -d "${tengine_install_dir}" ] && echo ${tengine_install_dir}
+  [ -d "${openresty_install_dir}" ] && echo ${openresty_install_dir}
+  [ -e "/etc/init.d/nginx" ] && echo /etc/init.d/nginx
+  [ -e "/lib/systemd/system/nginx.service" ] && echo /lib/systemd/system/nginx.service
+  [ -e "/etc/logrotate.d/nginx" ] && echo /etc/logrotate.d/nginx
 
-  [ -d "${apache_install_dir}" ] && echo "${apache_install_dir}"
-  [ -e "/lib/systemd/system/httpd.service" ] && echo '/lib/systemd/system/httpd.service'
-  [ -e "/etc/init.d/httpd" ] && echo "/etc/init.d/httpd"
-  [ -e "/etc/logrotate.d/apache" ] && echo "/etc/logrotate.d/apache"
+  [ -d "${apache_install_dir}" ] && echo ${apache_install_dir}
+  [ -e "/lib/systemd/system/httpd.service" ] && echo /lib/systemd/system/httpd.service
+  [ -e "/etc/init.d/httpd" ] && echo /etc/init.d/httpd
+  [ -e "/etc/logrotate.d/apache" ] && echo /etc/logrotate.d/apache
 
-  [ -d "${tomcat_install_dir}" ] && echo "${tomcat_install_dir}"
-  [ -e "/etc/init.d/tomcat" ] && echo "/etc/init.d/tomcat"
-  [ -e "/etc/logrotate.d/tomcat" ] && echo "/etc/logrotate.d/tomcat"
-  [ -d "/usr/java" ] && echo '/usr/java'
-  [ -d "/usr/local/apr" ] && echo '/usr/local/apr'
+  [ -d "${tomcat_install_dir}" ] && echo ${tomcat_install_dir}
+  [ -e "/etc/init.d/tomcat" ] && echo /etc/init.d/tomcat
+  [ -e "/etc/logrotate.d/tomcat" ] && echo /etc/logrotate.d/tomcat
+  [ -d "/usr/java" ] && echo /usr/java
+  [ -d "/usr/local/apr" ] && echo /usr/local/apr
 }
 
 Uninstall_Web() {
@@ -191,22 +207,22 @@ Uninstall_Web() {
 }
 
 Print_MySQL() {
-  [ -e "${db_install_dir}" ] && echo "${db_install_dir}"
-  [ -e "/etc/init.d/mysqld" ] && echo "/etc/init.d/mysqld"
-  [ -e "/etc/my.cnf" ] && echo "/etc/my.cnf"
+  [ -e "${db_install_dir}" ] && echo ${db_install_dir}
+  [ -e "/etc/init.d/mysqld" ] && echo /etc/init.d/mysqld
+  [ -e "/etc/my.cnf" ] && echo /etc/my.cnf
 }
 
 Print_PostgreSQL() {
-  [ -e "${pgsql_install_dir}" ] && echo "${pgsql_install_dir}"
-  [ -e "/etc/init.d/postgresql" ] && echo "/etc/init.d/postgresql"
-  [ -e "/lib/systemd/system/postgresql.service" ] && echo "/lib/systemd/system/postgresql.service"
+  [ -e "${pgsql_install_dir}" ] && echo ${pgsql_install_dir}
+  [ -e "/etc/init.d/postgresql" ] && echo /etc/init.d/postgresql
+  [ -e "/lib/systemd/system/postgresql.service" ] && echo /lib/systemd/system/postgresql.service
 }
 
 Print_MongoDB() {
-  [ -e "${mongo_install_dir}" ] && echo "${mongo_install_dir}"
-  [ -e "/etc/init.d/mongod" ] && echo "/etc/init.d/mongod"
-  [ -e "/lib/systemd/system/mongod.service" ] && echo "/lib/systemd/system/mongod.service"
-  [ -e "/etc/mongod.conf" ] && echo "/etc/mongod.conf"
+  [ -e "${mongo_install_dir}" ] && echo ${mongo_install_dir}
+  [ -e "/etc/init.d/mongod" ] && echo /etc/init.d/mongod
+  [ -e "/lib/systemd/system/mongod.service" ] && echo /lib/systemd/system/mongod.service
+  [ -e "/etc/mongod.conf" ] && echo /etc/mongod.conf
 }
 
 Uninstall_MySQL() {
@@ -254,22 +270,59 @@ Uninstall_MongoDB() {
 }
 
 Print_PHP() {
-  [ -e "${php_install_dir}" ] && echo "${php_install_dir}"
-  [ -e "/etc/init.d/php-fpm" ] && echo "/etc/init.d/php-fpm"
-  [ -e "/lib/systemd/system/php-fpm.service" ] && echo '/lib/systemd/system/php-fpm.service'
-  [ -e "${imagick_install_dir}" ] && echo "${imagick_install_dir}"
-  [ -e "${gmagick_install_dir}" ] && echo "${gmagick_install_dir}"
-  [ -e "${curl_install_dir}" ] && echo "${curl_install_dir}"
+  [ -e "${php_install_dir}" ] && echo ${php_install_dir}
+  [ -e "/etc/init.d/php-fpm" ] && echo /etc/init.d/php-fpm
+  [ -e "/lib/systemd/system/php-fpm.service" ] && echo /lib/systemd/system/php-fpm.service
+}
+
+Print_MPHP() {
+  [ -e "${php_install_dir}${mphp_ver}" ] && echo ${php_install_dir}${mphp_ver}
+  [ -e "/etc/init.d/php${mphp_ver}-fpm" ] && echo /etc/init.d/php${mphp_ver}-fpm
+  [ -e "/lib/systemd/system/php${mphp_ver}-fpm.service" ] && echo /lib/systemd/system/php${mphp_ver}-fpm.service
+}
+
+Print_ALLPHP() {
+  [ -e "${php_install_dir}" ] && echo ${php_install_dir}
+  [ -e "/etc/init.d/php-fpm" ] && echo /etc/init.d/php-fpm
+  [ -e "/lib/systemd/system/php-fpm.service" ] && echo /lib/systemd/system/php-fpm.service
+  for php_ver in 53 54 55 56 70 71 72 73; do
+    [ -e "${php_install_dir}${php_ver}" ] && echo ${php_install_dir}${php_ver}
+    [ -e "/etc/init.d/php${php_ver}-fpm" ] && echo /etc/init.d/php${php_ver}-fpm
+    [ -e "/lib/systemd/system/php${php_ver}-fpm.service" ] && echo /lib/systemd/system/php${php_ver}-fpm.service
+  done
+  [ -e "${imagick_install_dir}" ] && echo ${imagick_install_dir}
+  [ -e "${gmagick_install_dir}" ] && echo ${gmagick_install_dir}
+  [ -e "${curl_install_dir}" ] && echo ${curl_install_dir}
 }
 
 Uninstall_PHP() {
   [ -e "/etc/init.d/php-fpm" ] && { service php-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php-fpm; }
   [ -e "/lib/systemd/system/php-fpm.service" ] && { systemctl stop php-fpm > /dev/null 2>&1; systemctl disable php-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php-fpm.service; }
+  [ -e "${apache_install_dir}/conf/httpd.conf" ] && [ -n "`grep libphp ${apache_install_dir}/conf/httpd.conf`" ] && sed -i '/libphp/d' ${apache_install_dir}/conf/httpd.conf
   [ -e "${php_install_dir}" ] && { rm -rf ${php_install_dir}; echo "${CMSG}PHP uninstall completed! ${CEND}"; }
+  sed -i "s@${php_install_dir}/bin:@@" /etc/profile
+}
+
+Uninstall_MPHP() {
+  [ -e "/etc/init.d/php${mphp_ver}-fpm" ] && { service php${mphp_ver}-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php${mphp_ver}-fpm; }
+  [ -e "/lib/systemd/system/php${mphp_ver}-fpm.service" ] && { systemctl stop php${mphp_ver}-fpm > /dev/null 2>&1; systemctl disable php${mphp_ver}-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php${mphp_ver}-fpm.service; }
+  [ -e "${php_install_dir}${mphp_ver}" ] && { rm -rf ${php_install_dir}${mphp_ver}; echo "${CMSG}PHP${mphp_ver} uninstall completed! ${CEND}"; }
+}
+
+Uninstall_ALLPHP() {
+  [ -e "/etc/init.d/php-fpm" ] && { service php-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php-fpm; }
+  [ -e "/lib/systemd/system/php-fpm.service" ] && { systemctl stop php-fpm > /dev/null 2>&1; systemctl disable php-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php-fpm.service; }
+  [ -e "${apache_install_dir}/conf/httpd.conf" ] && [ -n "`grep libphp ${apache_install_dir}/conf/httpd.conf`" ] && sed -i '/libphp/d' ${apache_install_dir}/conf/httpd.conf
+  [ -e "${php_install_dir}" ] && { rm -rf ${php_install_dir}; echo "${CMSG}PHP uninstall completed! ${CEND}"; }
+  sed -i "s@${php_install_dir}/bin:@@" /etc/profile
+  for php_ver in 53 54 55 56 70 71 72 73; do
+    [ -e "/etc/init.d/php${php_ver}-fpm" ] && { service php${php_ver}-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php${php_ver}-fpm; }
+    [ -e "/lib/systemd/system/php${php_ver}-fpm.service" ] && { systemctl stop php${php_ver}-fpm > /dev/null 2>&1; systemctl disable php${php_ver}-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php${php_ver}-fpm.service; }
+    [ -e "${php_install_dir}${php_ver}" ] && { rm -rf ${php_install_dir}${php_ver}; echo "${CMSG}PHP${php_ver} uninstall completed! ${CEND}"; }
+  done
   [ -e "${imagick_install_dir}" ] && rm -rf ${imagick_install_dir}
   [ -e "${gmagick_install_dir}" ] && rm -rf ${gmagick_install_dir}
-  [ -e "${curl_install_dir}" ] && rm -rf "${curl_install_dir}"
-  sed -i "s@${php_install_dir}/bin:@@" /etc/profile
+  [ -e "${curl_install_dir}" ] && rm -rf ${curl_install_dir}
 }
 
 Uninstall_PHPcache() {
@@ -283,6 +336,7 @@ Uninstall_PHPcache() {
   Uninstall_eAccelerator
   # reload php
   [ -e "${php_install_dir}/sbin/php-fpm" ] && service php-fpm reload
+  [ -e "${php_install_dir}${mphp_ver}/sbin/php-fpm" ] && service php${mphp_ver}-fpm reload
   [ -e "${apache_install_dir}/bin/apachectl" ] && ${apache_install_dir}/bin/apachectl -k graceful
 }
 
@@ -331,10 +385,22 @@ Uninstall_PHPext() {
     Uninstall_pecl_imap
   fi
 
+  # ldap
+  if [ "${pecl_ldap}" == '1' ]; then
+    . include/pecl_ldap.sh
+    Uninstall_pecl_ldap
+  fi
+
   # phalcon
   if [ "${pecl_phalcon}" == '1' ]; then
     . include/pecl_phalcon.sh
     Uninstall_pecl_phalcon
+  fi
+
+  # yaf
+  if [ "${pecl_yaf}" == '1' ]; then
+    . include/pecl_yaf.sh
+    Uninstall_pecl_yaf 2>&1 | tee -a ${oneinstack_dir}/install.log
   fi
 
   # pecl_memcached
@@ -375,6 +441,7 @@ Uninstall_PHPext() {
 
   # reload php
   [ -e "${php_install_dir}/sbin/php-fpm" ] && service php-fpm reload
+  [ -e "${php_install_dir}${mphp_ver}/sbin/php-fpm" ] && service php${mphp_ver}-fpm reload
   [ -e "${apache_install_dir}/bin/apachectl" ] && ${apache_install_dir}/bin/apachectl -k graceful
 }
 
@@ -389,18 +456,19 @@ Menu_PHPext() {
     echo -e "\t${CMSG} 5${CEND}. Uninstall gmagick"
     echo -e "\t${CMSG} 6${CEND}. Uninstall fileinfo"
     echo -e "\t${CMSG} 7${CEND}. Uninstall imap"
-    echo -e "\t${CMSG} 8${CEND}. Uninstall phalcon(PHP>=5.5)"
-    echo -e "\t${CMSG} 9${CEND}. Uninstall redis"
-    echo -e "\t${CMSG}10${CEND}. Uninstall memcached"
-    echo -e "\t${CMSG}11${CEND}. Uninstall memcache(PHP<=7.2)"
-    echo -e "\t${CMSG}12${CEND}. Uninstall mongodb"
-    echo -e "\t${CMSG}13${CEND}. Uninstall swoole"
-    echo -e "\t${CMSG}14${CEND}. Uninstall xdebug(PHP>=5.5)"
+    echo -e "\t${CMSG} 8${CEND}. Uninstall ldap"
+    echo -e "\t${CMSG} 9${CEND}. Uninstall phalcon(PHP>=5.5)"
+    echo -e "\t${CMSG}10${CEND}. Uninstall redis"
+    echo -e "\t${CMSG}11${CEND}. Uninstall memcached"
+    echo -e "\t${CMSG}12${CEND}. Uninstall memcache"
+    echo -e "\t${CMSG}13${CEND}. Uninstall mongodb"
+    echo -e "\t${CMSG}14${CEND}. Uninstall swoole"
+    echo -e "\t${CMSG}15${CEND}. Uninstall xdebug(PHP>=5.5)"
     read -e -p "Please input a number:(Default 0 press Enter) " phpext_option
     phpext_option=${phpext_option:-0}
     [ "${phpext_option}" == '0' ] && break
     array_phpext=(${phpext_option})
-    array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14)
+    array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
     for v in ${array_phpext[@]}
     do
       [ -z "`echo ${array_all[@]} | grep -w ${v}`" ] && phpext_flag=1
@@ -417,25 +485,26 @@ Menu_PHPext() {
       [ -n "`echo ${array_phpext[@]} | grep -w 5`" ] && pecl_gmagick=1
       [ -n "`echo ${array_phpext[@]} | grep -w 6`" ] && pecl_fileinfo=1
       [ -n "`echo ${array_phpext[@]} | grep -w 7`" ] && pecl_imap=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 8`" ] && pecl_phalcon=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 9`" ] && pecl_redis=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 10`" ] && pecl_memcached=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 11`" ] && pecl_memcache=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 12`" ] && pecl_mongodb=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 13`" ] && pecl_swoole=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 14`" ] && pecl_xdebug=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 8`" ] && pecl_ldap=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 9`" ] && pecl_phalcon=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 10`" ] && pecl_redis=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 11`" ] && pecl_memcached=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 12`" ] && pecl_memcache=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 13`" ] && pecl_mongodb=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 14`" ] && pecl_swoole=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 15`" ] && pecl_xdebug=1
       break
     fi
   done
 }
 
 Print_HHVM() {
-  [ -e "/usr/bin/hhvm" ] && echo "/usr/bin/hhvm"
-  [ -e "/etc/hhvm" ] && echo "/etc/hhvm"
-  [ -e "/var/log/hhvm" ] && echo "/var/log/hhvm"
-  [ -e "/lib/systemd/system/hhvm.service" ] && echo "/lib/systemd/system/hhvm.service"
-  [ -e "/etc/supervisord.conf" ] && echo "/etc/supervisord.conf"
-  [ -e "/etc/init.d/supervisord" ] && echo "/etc/init.d/supervisord"
+  [ -e "/usr/bin/hhvm" ] && echo /usr/bin/hhvm
+  [ -e "/etc/hhvm" ] && echo /etc/hhvm
+  [ -e "/var/log/hhvm" ] && echo /var/log/hhvm
+  [ -e "/lib/systemd/system/hhvm.service" ] && echo /lib/systemd/system/hhvm.service
+  [ -e "/etc/supervisord.conf" ] && echo /etc/supervisord.conf
+  [ -e "/etc/init.d/supervisord" ] && echo /etc/init.d/supervisord
 }
 
 Uninstall_HHVM() {
@@ -445,9 +514,9 @@ Uninstall_HHVM() {
 }
 
 Print_PureFtpd() {
-  [ -e "${pureftpd_install_dir}" ] && echo "${pureftpd_install_dir}"
-  [ -e "/etc/init.d/pureftpd" ] && echo "/etc/init.d/pureftpd"
-  [ -e "/lib/systemd/system/pureftpd.service" ] && echo "/lib/systemd/system/pureftpd.service"
+  [ -e "${pureftpd_install_dir}" ] && echo ${pureftpd_install_dir}
+  [ -e "/etc/init.d/pureftpd" ] && echo /etc/init.d/pureftpd
+  [ -e "/lib/systemd/system/pureftpd.service" ] && echo /lib/systemd/system/pureftpd.service
 }
 
 Uninstall_PureFtpd() {
@@ -456,9 +525,9 @@ Uninstall_PureFtpd() {
 }
 
 Print_Redis_server() {
-  [ -e "${redis_install_dir}" ] && echo "${redis_install_dir}"
-  [ -e "/etc/init.d/redis-server" ] && echo "/etc/init.d/redis-server"
-  [ -e "/lib/systemd/system/redis-server.service" ] && echo '/lib/systemd/system/redis-server.service'
+  [ -e "${redis_install_dir}" ] && echo ${redis_install_dir}
+  [ -e "/etc/init.d/redis-server" ] && echo /etc/init.d/redis-server
+  [ -e "/lib/systemd/system/redis-server.service" ] && echo /lib/systemd/system/redis-server.service
 }
 
 Uninstall_Redis_server() {
@@ -467,9 +536,9 @@ Uninstall_Redis_server() {
 }
 
 Print_Memcached_server() {
-  [ -e "${memcached_install_dir}" ] && echo "${memcached_install_dir}"
-  [ -e "/etc/init.d/memcached" ] && echo "/etc/init.d/memcached"
-  [ -e "/usr/bin/memcached" ] && echo "/usr/bin/memcached"
+  [ -e "${memcached_install_dir}" ] && echo ${memcached_install_dir}
+  [ -e "/etc/init.d/memcached" ] && echo /etc/init.d/memcached
+  [ -e "/usr/bin/memcached" ] && echo /usr/bin/memcached
 }
 
 Uninstall_Memcached_server() {
@@ -477,7 +546,7 @@ Uninstall_Memcached_server() {
 }
 
 Print_phpMyAdmin() {
-  [ -d "${wwwroot_dir}/default/phpMyAdmin" ] && echo "${wwwroot_dir}/default/phpMyAdmin"
+  [ -d "${wwwroot_dir}/default/phpMyAdmin" ] && echo ${wwwroot_dir}/default/phpMyAdmin
 }
 
 Uninstall_phpMyAdmin() {
@@ -485,11 +554,15 @@ Uninstall_phpMyAdmin() {
 }
 
 Print_openssl() {
-  [ -d "${openssl_install_dir}" ] && echo "${openssl_install_dir}"
+  [ -d "${openssl_install_dir}" ] && echo ${openssl_install_dir}
 }
 
 Uninstall_openssl() {
   [ -d "${openssl_install_dir}" ] && rm -rf ${openssl_install_dir}
+}
+
+Print_Python() {
+  [ -d "${python_install_dir}" ] && echo ${python_install_dir}
 }
 
 Menu() {
@@ -501,7 +574,7 @@ What Are You Doing?
 \t${CMSG} 2${CEND}. Uninstall MySQL/MariaDB/Percona/AliSQL
 \t${CMSG} 3${CEND}. Uninstall PostgreSQL
 \t${CMSG} 4${CEND}. Uninstall MongoDB
-\t${CMSG} 5${CEND}. Uninstall PHP
+\t${CMSG} 5${CEND}. Uninstall all PHP
 \t${CMSG} 6${CEND}. Uninstall PHP opcode cache
 \t${CMSG} 7${CEND}. Uninstall PHP extensions
 \t${CMSG} 8${CEND}. Uninstall HHVM
@@ -509,12 +582,13 @@ What Are You Doing?
 \t${CMSG}10${CEND}. Uninstall Redis
 \t${CMSG}11${CEND}. Uninstall Memcached
 \t${CMSG}12${CEND}. Uninstall phpMyAdmin
+\t${CMSG}13${CEND}. Uninstall Python (PATH: ${python_install_dir})
 \t${CMSG} q${CEND}. Exit
 "
   echo
   read -e -p "Please input the correct option: " Number
-  if [[ ! "${Number}" =~ ^[0-9,q]$|^1[0-2]$ ]]; then
-    echo "${CWARNING}input error! Please only input 0~12 and q${CEND}"
+  if [[ ! "${Number}" =~ ^[0-9,q]$|^1[0-3]$ ]]; then
+    echo "${CWARNING}input error! Please only input 0~13 and q${CEND}"
   else
     case "$Number" in
     0)
@@ -523,26 +597,28 @@ What Are You Doing?
       Print_MySQL
       Print_PostgreSQL
       Print_MongoDB
-      Print_PHP
+      Print_ALLPHP
       Print_HHVM
       Print_PureFtpd
       Print_Redis_server
       Print_Memcached_server
       Print_openssl
       Print_phpMyAdmin
+      Print_Python
       Uninstall_status
       if [ "${uninstall_flag}" == 'y' ]; then
         Uninstall_Web
         Uninstall_MySQL
         Uninstall_PostgreSQL
         Uninstall_MongoDB
-        Uninstall_PHP
+        Uninstall_ALLPHP
         Uninstall_HHVM
         Uninstall_PureFtpd
         Uninstall_Redis_server
         Uninstall_Memcached_server
         Uninstall_openssl
         Uninstall_phpMyAdmin
+        . include/python.sh; Uninstall_Python
       else
         exit
       fi
@@ -572,9 +648,9 @@ What Are You Doing?
       [ "${uninstall_flag}" == 'y' ] && Uninstall_MongoDB || exit
       ;;
     5)
-      Print_PHP
+      Print_ALLPHP
       Uninstall_status
-      [ "${uninstall_flag}" == 'y' ] && Uninstall_PHP || exit
+      [ "${uninstall_flag}" == 'y' ] && Uninstall_ALLPHP || exit
       ;;
     6)
       Uninstall_status
@@ -610,6 +686,11 @@ What Are You Doing?
       Uninstall_status
       [ "${uninstall_flag}" == 'y' ] && Uninstall_phpMyAdmin || exit
       ;;
+    13)
+      Print_Python
+      Uninstall_status
+      [ "${uninstall_flag}" == 'y' ] && { . include/python.sh; Uninstall_Python; } || exit
+      ;;
     q)
       exit
       ;;
@@ -625,12 +706,18 @@ else
   [ "${mysql_flag}" == 'y' ] && Print_MySQL
   [ "${postgresql_flag}" == 'y' ] && Print_PostgreSQL
   [ "${mongodb_flag}" == 'y' ] && Print_MongoDB
-  [ "${php_flag}" == 'y' ] && Print_PHP
+  if [ "${allphp_flag}" == 'y' ]; then
+    Print_ALLPHP
+  else
+    [ "${php_flag}" == 'y' ] && Print_PHP
+    [ "${mphp_flag}" == 'y' ] && [ "${phpcache_flag}" != 'y' ] && [ -z "${php_extensions}" ] && Print_MPHP
+  fi
   [ "${hhvm_flag}" == 'y' ] && Print_HHVM
   [ "${pureftpd_flag}" == 'y' ] && Print_PureFtpd
   [ "${redis_flag}" == 'y' ] && Print_Redis_server
   [ "${memcached_flag}" == 'y' ] && Print_Memcached_server
   [ "${phpmyadmin_flag}" == 'y' ] && Print_phpMyAdmin
+  [ "${python_flag}" == 'y' ] && Print_Python
   [ "${all_flag}" == 'y' ] && Print_openssl
   Uninstall_status
   if [ "${uninstall_flag}" == 'y' ]; then
@@ -638,14 +725,22 @@ else
     [ "${mysql_flag}" == 'y' ] && Uninstall_MySQL
     [ "${postgresql_flag}" == 'y' ] && Uninstall_PostgreSQL
     [ "${mongodb_flag}" == 'y' ] && Uninstall_MongoDB
-    [ "${phpcache_flag}" == 'y' ] && Uninstall_PHPcache
-    Uninstall_PHPext
-    [ "${php_flag}" == 'y' ] && Uninstall_PHP
+    if [ "${allphp_flag}" == 'y' ]; then
+      Uninstall_ALLPHP
+    else
+      [ "${php_flag}" == 'y' ] && Uninstall_PHP
+      [ "${php_flag}" == 'y' ] && [ "${phpcache_flag}" == 'y' ] && Uninstall_PHPcache
+      [ -n "${php_extensions}" ] && Uninstall_PHPext
+      [ "${mphp_flag}" == 'y' ] && [ "${phpcache_flag}" != 'y' ] && [ -z "${php_extensions}" ] && Uninstall_MPHP
+      [ "${mphp_flag}" == 'y' ] && [ "${phpcache_flag}" == 'y' ] && { php_install_dir=${php_install_dir}${mphp_ver}; Uninstall_PHPcache; }
+      [ "${mphp_flag}" == 'y' ] && [ -n "${php_extensions}" ] && { php_install_dir=${php_install_dir}${mphp_ver}; Uninstall_PHPext; }
+    fi
     [ "${hhvm_flag}" == 'y' ] && Uninstall_HHVM
     [ "${pureftpd_flag}" == 'y' ] && Uninstall_PureFtpd
     [ "${redis_flag}" == 'y' ] && Uninstall_Redis_server
     [ "${memcached_flag}" == 'y' ] && Uninstall_Memcached_server
     [ "${phpmyadmin_flag}" == 'y' ] && Uninstall_phpMyAdmin
+    [ "${python_flag}" == 'y' ] && { . include/python.sh; Uninstall_Python; }
     [ "${all_flag}" == 'y' ] && Uninstall_openssl
   fi
 fi

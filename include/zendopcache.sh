@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.cn
+# BLOG:  https://linuxeye.com
 #
 # Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -12,13 +12,13 @@ Install_ZendOPcache() {
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     pushd ${oneinstack_dir}/src > /dev/null
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
-    PHP_detail_ver=$(${php_install_dir}/bin/php -r 'echo PHP_VERSION;')
+    PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
     if [[ "${PHP_main_ver}" =~ ^5.[3-4]$ ]]; then
       tar xzf zendopcache-${zendopcache_ver}.tgz
       pushd zendopcache-${zendopcache_ver} > /dev/null
     else
-      src_url=http://www.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
+      src_url=https://secure.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
       tar xzf php-${PHP_detail_ver}.tar.gz
       pushd php-${PHP_detail_ver}/ext/opcache > /dev/null
     fi

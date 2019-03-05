@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.cn
+# BLOG:  https://linuxeye.com
 #
 # Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #        Install SS Server
@@ -98,7 +98,7 @@ Check_SS() {
 
 AddUser_SS() {
   while :; do echo
-    [ ${password_queit} != 'y' ] && read -e -p "Please input password for SS: " SS_password
+    [ "${password_queit}" != 'y' ] && read -e -p "Please input password for SS: " SS_password
     [ -n "$(echo ${SS_password} | grep '[+|&]')" ] && { echo "${CWARNING}input error,not contain a plus sign (+) and & ${CEND}"; continue; }
     (( ${#SS_password} >= 5 )) && break || echo "${CWARNING}SS password least 5 characters! ${CEND}"
   done
@@ -120,7 +120,7 @@ Iptables() {
   fi
 
   while :; do echo
-    [ ${port_queit} != 'y' ] && read -e -p "Please input SS port(Default: ${SS_Default_port}): " SS_port
+    [ "${port_queit}" != 'y' ] && read -e -p "Please input SS port(Default: ${SS_Default_port}): " SS_port
     SS_port=${SS_port:-${SS_Default_port}}
     if [ ${SS_port} -ge 1 >/dev/null 2>&1 -a ${SS_port} -le 65535 >/dev/null 2>&1 ]; then
       [ -z "$(netstat -tpln | grep :${SS_port}$)" ] && break || echo "${CWARNING}This port is already used! ${CEND}"
@@ -194,9 +194,8 @@ Install_SS_python() {
   ${python_install_dir}/bin/pip install M2Crypto
   ${python_install_dir}/bin/pip install greenlet
   ${python_install_dir}/bin/pip install gevent
-  ${python_install_dir}/bin/pip install shadowsocks
+  ${python_install_dir}/bin/pip install git+https://github.com/shadowsocks/shadowsocks.git@master
   if [ -f ${python_install_dir}/bin/ssserver ]; then
-    sed -i 's@libcrypto.EVP_CIPHER_CTX_cleanup@libcrypto.EVP_CIPHER_CTX_reset@g' ${python_install_dir}/lib/python3.6/site-packages/shadowsocks/crypto/openssl.py
     if [ -e /bin/systemctl ]; then
       /bin/cp ../init.d/SS-python.service /lib/systemd/system/shadowsocks.service
       sed -i "s@/usr/local/python@${python_install_dir}@g" /lib/systemd/system/shadowsocks.service
@@ -216,7 +215,7 @@ Install_SS_python() {
 }
 
 Install_SS_libev() {
-  src_url=http://mirrors.linuxeye.com/oneinstack/src/shadowsocks-libev-3.2.3.tar.gz && Download_src
+  src_url=http://mirrors.linuxeye.com/oneinstack/src/shadowsocks-libev-3.2.4.tar.gz && Download_src
   src_url=http://mirrors.linuxeye.com/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
   src_url=http://mirrors.linuxeye.com/oneinstack/src/mbedtls-2.16.0-apache.tgz && Download_src
   if [ ! -e "/usr/local/lib/libsodium.la" ]; then
@@ -232,8 +231,8 @@ Install_SS_libev() {
   make SHARED=1 CFLAGS=-fPIC
   make DESTDIR=/usr install
   popd > /dev/null
-  tar xzf shadowsocks-libev-3.2.3.tar.gz
-  pushd shadowsocks-libev-3.2.3 > /dev/null
+  tar xzf shadowsocks-libev-3.2.4.tar.gz
+  pushd shadowsocks-libev-3.2.4 > /dev/null
   make clean
   ./configure
   make -j ${THREAD} && make install
@@ -304,6 +303,7 @@ Config_SS() {
   [ "${ss_option}" == '1' ] && cat > /etc/shadowsocks/config.json << EOF
 {
     "server":"0.0.0.0",
+    "mode":"tcp_and_udp",
     "server_port":${SS_port},
     "local_port":1080,
     "password":"${SS_password}",

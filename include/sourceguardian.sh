@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.cn
+# BLOG:  https://linuxeye.com
 #
 # Notes: OneinStack for CentOS/RedHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -11,7 +11,7 @@
 Install_SourceGuardian() {
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     pushd ${oneinstack_dir}/src > /dev/null
-    PHP_detail_ver=`${php_install_dir}/bin/php -r 'echo PHP_VERSION;'`
+    PHP_detail_ver=`${php_install_dir}/bin/php-config --version`
     PHP_main_ver=${PHP_detail_ver%.*}
     phpExtensionDir=`${php_install_dir}/bin/php-config --extension-dir`
     if [[ "${PHP_main_ver}" =~ ^5.[3-6]$|^7.[0-2]$ ]] || [ "${TARGET_ARCH}" == "armv8" ]; then
@@ -21,7 +21,7 @@ Install_SourceGuardian() {
       else
         tar xzf loaders.linux-${SYS_BIT_c}.tar.gz -C sourceguardian
       fi
-      [ -e "${php_install_dir}/bin/phpize" ] && [ ! -d "${phpExtensionDir}" ] && mkdir -p ${phpExtensionDir}
+      [ ! -d "${phpExtensionDir}" ] && mkdir -p ${phpExtensionDir}
       if [ -z "`echo ${phpExtensionDir} | grep 'non-zts'`" ]; then
         /bin/mv sourceguardian/ixed.${PHP_main_ver}ts.lin ${phpExtensionDir}
         extension="ixed.${PHP_main_ver}ts.lin"
